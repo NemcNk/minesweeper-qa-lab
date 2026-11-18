@@ -84,7 +84,6 @@ final class BoardState {
 
             stateMap.set(coord, CellState.WRONG_FLAG);
 
-            flaggedCount--;
         }
     }
 

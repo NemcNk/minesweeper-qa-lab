@@ -7,7 +7,6 @@ import model.Difficulty;
 import model.GameConfig;
 import model.GameState;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -154,7 +153,6 @@ class GameTest {
      * Reproduces BUG-001 (see docs/qa/bugs/BUG-001.md): wrong flags reduce
      * the flag counter when the board is revealed after a loss.
      */
-    @Disabled("BUG-001: remaining bombs change after loss")
     @Test
     void remainingBombsDoNotChangeAfterLoss() {
 

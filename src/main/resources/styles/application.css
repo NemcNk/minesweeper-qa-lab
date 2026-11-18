@@ -1,0 +1,260 @@
+.root {
+    -fx-font-family: "Arial";
+    -fx-background-color: #faf9f6;
+}
+
+/* MENU */
+
+.menu-root {
+    -fx-background-color: #faf9f6;
+    -fx-padding: 20px;
+}
+
+.menu-icon {
+    -fx-background-color: white;
+    -fx-background-radius: 100px;
+
+    -fx-min-width: 100px;
+    -fx-min-height: 100px;
+
+    -fx-max-width: 100px;
+    -fx-max-height: 100px;
+
+    -fx-effect: dropshadow(
+        gaussian, rgba(0,0,0,0.10), 16, 0, 0, 4
+    );
+}
+
+.menu-title {
+    -fx-font-size: 38px;
+    -fx-text-fill: #202c3d;
+    -fx-padding: 4px 0 8px 0;
+    -fx-alignment: center;
+}
+
+.difficulty-button {
+    -fx-background-color: white;
+    -fx-text-fill: #777777;
+    -fx-font-size: 15px;
+    -fx-alignment: center;
+    -fx-padding: 12px 20px;
+    -fx-background-radius: 12px;
+    -fx-pref-height: 52px;
+    -fx-cursor: hand;
+}
+
+.difficulty-button:hover {
+    -fx-background-color: #f0f2f6;
+}
+
+.difficulty-button.selected {
+    -fx-background-color: #e9edf3;
+    -fx-text-fill: #202c3d;
+    -fx-border-color: #cbd3df;
+    -fx-border-width: 1px;
+    -fx-border-radius: 12px;
+}
+
+.difficulty-button.selected .label {
+    -fx-text-fill: #202c3d;
+}
+
+.difficulty-button .label {
+    -fx-text-fill: #777777;
+    -fx-font-size: 15px;
+}
+
+.play-button {
+    -fx-background-color: #202c3d;
+    -fx-text-fill: white;
+    -fx-font-size: 20px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 16px;
+    -fx-pref-height: 68px;
+    -fx-cursor: hand;
+}
+
+.play-button:hover {
+    -fx-background-color: #34465f;
+}
+
+.stats-link-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #555;
+    -fx-font-size: 16px;
+    -fx-pref-height: 40px;
+    -fx-cursor: hand;
+}
+
+.stats-link-button:hover {
+    -fx-text-fill: #000;
+}
+
+.stats-bar {
+    -fx-fill: #555;
+}
+
+.stats-link-button:hover .stats-bar {
+    -fx-fill: #000;
+}
+
+/* GAME */
+
+.game-root {
+    -fx-background-color: #faf9f6;
+    -fx-padding: 8px;
+}
+
+.game-top-panel {
+    -fx-alignment: center;
+}
+
+.game-top-panel .label {
+    -fx-font-family: "Arial";
+    -fx-font-size: 14px;
+    -fx-text-fill: #444444;
+    -fx-alignment: center;
+}
+
+.back-button {
+    -fx-background-color: #202c3d;
+    -fx-text-fill: white;
+    -fx-font-size: 14px;
+    -fx-background-radius: 10px;
+    -fx-padding: 10px 20px;
+    -fx-cursor: hand;
+}
+
+.back-button:hover {
+    -fx-background-color: #34465f;
+}
+
+/* CELLS */
+
+.cell {
+    -fx-alignment: center;
+}
+
+.cell.closed {
+    -fx-background-color: #e6e8ed;
+    -fx-background-radius: 4px;
+    -fx-border-color: #d4d7df;
+    -fx-border-width: 1px;
+    -fx-border-radius: 4px;
+}
+
+.cell.closed:hover {
+    -fx-background-color: #dce1e9;
+}
+
+.cell.opened {
+    -fx-background-color: white;
+    -fx-border-color: #e1e1e1;
+    -fx-border-width: 0.7px;
+}
+
+.cell.bombed {
+    -fx-background-color: #AA1E22;
+    -fx-border-color: #AA1E22;
+}
+
+/* NUMBERS */
+
+.cell-number {
+    -fx-font-weight: bold;
+}
+
+.number-1 {
+    -fx-text-fill: #1769c2;
+}
+
+.number-2 {
+    -fx-text-fill: #078c4c;
+}
+
+.number-3 {
+    -fx-text-fill: #e33342;
+}
+
+.number-4 {
+    -fx-text-fill: #243b91;
+}
+
+.number-5 {
+    -fx-text-fill: #923b34;
+}
+
+.number-6 {
+    -fx-text-fill: #159caa;
+}
+
+.number-7 {
+    -fx-text-fill: #202020;
+}
+
+.number-8 {
+    -fx-text-fill: #777777;
+}
+
+.result-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.45);
+}
+
+.result-card {
+    -fx-background-color: #f4f2ee;
+    -fx-background-radius: 12;
+    -fx-padding: 24 16 12 16;
+}
+
+.result-title {
+    -fx-font-size: 22px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #232b3a;
+}
+
+.result-subtitle {
+    -fx-font-size: 13px;
+    -fx-text-fill: #7a7a7a;
+}
+
+.result-divider {
+    -fx-background-color: #e0ddd6;
+    -fx-pref-height: 1;
+}
+
+.result-time-caption {
+    -fx-font-size: 16px;
+    -fx-text-fill: #333;
+}
+
+.result-time-value {
+    -fx-font-size: 40px;
+    -fx-font-weight: bold;
+    -fx-text-fill: #232b3a;
+}
+
+.result-primary-button {
+    -fx-background-color: #232b3a;
+    -fx-text-fill: white;
+    -fx-font-size: 16px;
+    -fx-font-weight: bold;
+    -fx-background-radius: 8;
+    -fx-padding: 10 0;
+    -fx-cursor: hand;
+}
+.result-primary-button:hover {
+    -fx-background-color: #343e52;
+}
+
+.result-link-button {
+    -fx-background-color: transparent;
+    -fx-text-fill: #555;
+    -fx-font-size: 13px;
+    -fx-cursor: hand;
+}
+.result-link-button:hover {
+    -fx-text-fill: #000;
+}
+
+
+

@@ -1,0 +1,33 @@
+# Build output
+target/
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+out/
+
+# Mac OS
+.DS_Store
+
+# Log
+*.log
+
+# Test and coverage reports
+allure-results/
+allure-report/
+
+# Artifacts and temporary files
+*.dmg
+*.pkg
+*.msi
+*.app
+*.jar
+runtime/
+imput/
+output/
+dist/
+build/

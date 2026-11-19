@@ -28,7 +28,7 @@ final class MineIcon extends Group {
 
     MineIcon(int cellSize) {
 
-        // dark spikes (diagonal lines at the top and bottom).
+        // Dark spikes (diagonal lines at the top and bottom).
         getChildren().addAll(
                 spike(65, 24, 70, 15.4, DARK_SPIKE),
                 spike(35, 24, 30, 15.4, DARK_SPIKE),
@@ -36,7 +36,7 @@ final class MineIcon extends Group {
                 spike(35, 76, 30, 84.6, DARK_SPIKE)
         );
 
-        // light spikes
+        // Light spikes
         getChildren().addAll(
                 spike(50, 24, 50, 8, LIGHT_SPIKE),
                 spike(50, 76, 50, 92, LIGHT_SPIKE),

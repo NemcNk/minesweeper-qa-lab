@@ -2,11 +2,6 @@ package ui;
 
 import core.Game;
 
-import model.Coord;
-import model.Difficulty;
-import model.GameState;
-import stats.StatsRepository;
-
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
@@ -19,8 +14,19 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
 
+import model.Coord;
+import model.Difficulty;
+import model.GameState;
+
 import java.util.Objects;
 
+import stats.StatsRepository;
+
+/**
+ * Represents the main Minesweeper game screen.
+ * Manages the game board, timer, pause functionality,
+ * and game result display.
+ */
 public final class GameScreen extends StackPane {
 
     private static final double BUTTON_WIDTH = 170;
@@ -28,8 +34,9 @@ public final class GameScreen extends StackPane {
     private static final double BUTTONS_WIDTH =
             BUTTON_WIDTH * 2 + BUTTON_GAP;
 
-    // Delay before the results screen: allows the player to see the revealed mines.
-    private static final Duration RESULT_DELAY = Duration.millis(1000);
+    /** Delay before displaying the game result. */
+    private static final Duration RESULT_DELAY =
+            Duration.millis(1000);
 
     private static final String PAUSE_TEXT = "⏸   Pause";
     private static final String RESUME_TEXT = "▶   Resume";
@@ -51,12 +58,18 @@ public final class GameScreen extends StackPane {
     private boolean paused;
     private boolean resultRecorded;
 
+    /**
+     * Creates the game screen and initializes its components.
+     *
+     * @param difficulty selected game difficulty
+     * @param stats repository for storing game statistics
+     * @param backAction action executed when returning to the menu
+     */
     public GameScreen(
             Difficulty difficulty,
             StatsRepository stats,
             Runnable backAction
     ) {
-
         this.difficulty = Objects.requireNonNull(difficulty);
         this.stats = Objects.requireNonNull(stats);
         this.backAction = Objects.requireNonNull(backAction);
@@ -126,15 +139,20 @@ public final class GameScreen extends StackPane {
 
     // Input
 
+    /**
+     * Handles mouse clicks on the game board.
+     * Starts the timer on the first move and updates the game interface.
+     *
+     * @param coord coordinate of the clicked cell
+     * @param event mouse event containing the pressed button
+     */
     private void handleClick(Coord coord, MouseEvent event) {
-
         // During the pause, clicks are blocked by the PauseOverlay.
         if (game.getState() != GameState.PLAYING) {
             return;
         }
 
         if (event.getButton() == MouseButton.PRIMARY) {
-
             boolean wasStarted = game.isStarted();
 
             game.pressLeftButton(coord);
@@ -145,7 +163,6 @@ public final class GameScreen extends StackPane {
             }
 
         } else if (event.getButton() == MouseButton.SECONDARY) {
-
             game.pressRightButton(coord);
         }
 
@@ -155,8 +172,10 @@ public final class GameScreen extends StackPane {
         updateGameState();
     }
 
+    /**
+     * Toggles the game pause state and updates the timer.
+     */
     private void togglePause() {
-
         if (game.getState() != GameState.PLAYING || !game.isStarted()) {
             return;
         }
@@ -172,16 +191,21 @@ public final class GameScreen extends StackPane {
         updatePauseUi();
     }
 
+    /**
+     * Updates the pause overlay and pause button text.
+     */
     private void updatePauseUi() {
-
         pauseOverlay.setVisible(paused);
         pauseButton.setText(paused ? RESUME_TEXT : PAUSE_TEXT);
     }
 
-    // game state
+    // Game state
 
+    /**
+     * Handles the expiration of the game timer.
+     * Changes the game state to timeout and updates the board.
+     */
     private void onTimeExpired() {
-
         game.timeout();
 
         boardView.update();
@@ -189,8 +213,10 @@ public final class GameScreen extends StackPane {
         updateGameState();
     }
 
+    /**
+     * Updates the interface according to the current game state.
+     */
     private void updateGameState() {
-
         GameState state = game.getState();
 
         switch (state) {
@@ -198,13 +224,21 @@ public final class GameScreen extends StackPane {
             case TIMEOUT -> finish(false, "Time's up!");
             case WON -> finish(true, "Congratulations!");
             case PLAYING -> {
-                // the game continues
+                // The game continues.
             }
+            default -> throw new IllegalStateException(
+                    "Unexpected game state: " + state
+            );
         }
     }
 
+    /**
+     * Finishes the game, stops the timer and displays the result.
+     *
+     * @param won true if the player won, otherwise false
+     * @param subtitle message displayed with the game result
+     */
     private void finish(boolean won, String subtitle) {
-
         timer.stop();
         pauseButton.setDisable(true);
 
@@ -216,8 +250,13 @@ public final class GameScreen extends StackPane {
         showResult(won, subtitle);
     }
 
+    /**
+     * Records the game result in the statistics repository.
+     * Prevents the same result from being recorded more than once.
+     *
+     * @param won true if the player won, otherwise false
+     */
     private void recordResult(boolean won) {
-
         if (resultRecorded) {
             return;
         }
@@ -231,8 +270,13 @@ public final class GameScreen extends StackPane {
         }
     }
 
+    /**
+     * Schedules the display of the game result after a short delay.
+     *
+     * @param won true if the player won, otherwise false
+     * @param subtitle message displayed with the game result
+     */
     private void showResult(boolean won, String subtitle) {
-
         int elapsed = timer.getElapsedSeconds();
 
         stopResultDelay();
@@ -244,8 +288,10 @@ public final class GameScreen extends StackPane {
         resultDelay.play();
     }
 
+    /**
+     * Stops the pending result display animation.
+     */
     private void stopResultDelay() {
-
         if (resultDelay != null) {
             resultDelay.stop();
             resultDelay = null;
@@ -254,8 +300,10 @@ public final class GameScreen extends StackPane {
 
     // Screen controls
 
+    /**
+     * Restarts the current game and resets its interface.
+     */
     private void restart() {
-
         stopResultDelay();
         resultOverlay.hide();
 
@@ -274,16 +322,20 @@ public final class GameScreen extends StackPane {
         topPanel.updateMines(game.getRemainingBombs());
     }
 
+    /**
+     * Stops active transitions and returns to the main menu.
+     */
     private void exitToMenu() {
-
         stopResultDelay();
         timer.stop();
 
         backAction.run();
     }
 
+    /**
+     * Plays the fade-in animation when the game screen appears.
+     */
     private void fadeIn() {
-
         setOpacity(0);
 
         FadeTransition fade = new FadeTransition(
@@ -296,25 +348,38 @@ public final class GameScreen extends StackPane {
         fade.play();
     }
 
+    /**
+     * Sets the minimum, preferred and maximum width of a region.
+     *
+     * @param region JavaFX region whose width is being configured
+     * @param width target width
+     */
     private static void fixWidth(Region region, double width) {
-
         region.setMinWidth(width);
         region.setPrefWidth(width);
         region.setMaxWidth(width);
     }
 
-    // sizes
+    // Sizes
 
+    /**
+     * Returns the preferred width of the game screen content.
+     *
+     * @return calculated content width
+     */
     public double getContentWidth() {
-
         return Math.max(
                 Math.max(boardView.getBoardWidth(), topPanel.prefWidth(-1)),
                 BUTTONS_WIDTH
         );
     }
 
+    /**
+     * Returns the preferred height of the game screen content.
+     *
+     * @return calculated content height
+     */
     public double getContentHeight() {
-
         return boardView.getBoardHeight()
                 + topPanel.prefHeight(-1)
                 + 10
@@ -322,6 +387,7 @@ public final class GameScreen extends StackPane {
                 + 20;
     }
 }
+
 
 
 

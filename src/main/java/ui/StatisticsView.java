@@ -1,8 +1,6 @@
 package ui;
 
-import model.Difficulty;
-import stats.DifficultyStats;
-import stats.StatsRepository;
+import java.util.OptionalInt;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -11,15 +9,25 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 
-import java.util.OptionalInt;
+import model.Difficulty;
+import stats.DifficultyStats;
+import stats.StatsRepository;
 
+/**
+ * View displaying statistics for each difficulty level.
+ */
 public final class StatisticsView extends VBox {
 
     private static final String TEXT_COLOR = "#7a7a7a";
     private static final String TITLE_COLOR = "#212b3f";
 
+    /**
+     * Creates the statistics view.
+     *
+     * @param stats repository containing game statistics
+     * @param backAction action to execute when returning to the menu
+     */
     public StatisticsView(StatsRepository stats, Runnable backAction) {
-
         setAlignment(Pos.CENTER);
         setSpacing(20);
 
@@ -27,9 +35,9 @@ public final class StatisticsView extends VBox {
 
         Label title = new Label("Statistics");
         title.setStyle(
-                "-fx-text-fill: " + TITLE_COLOR + ";" +
-                        "-fx-font-size: 28px;" +
-                        "-fx-font-weight: bold;"
+                "-fx-text-fill: " + TITLE_COLOR + ";"
+                        + "-fx-font-size: 28px;"
+                        + "-fx-font-weight: bold;"
         );
 
         GridPane table = new GridPane();
@@ -46,7 +54,6 @@ public final class StatisticsView extends VBox {
         int row = 1;
 
         for (Difficulty difficulty : Difficulty.values()) {
-
             DifficultyStats entry = stats.get(difficulty);
 
             table.add(cell(difficulty.getTitle(), false), 0, row);
@@ -60,10 +67,10 @@ public final class StatisticsView extends VBox {
         VBox card = new VBox(table);
         card.setAlignment(Pos.CENTER);
         card.setPadding(new Insets(24, 32, 24, 32));
-        card.setMaxWidth(VBox.USE_PREF_SIZE);
+        card.setMaxWidth(USE_PREF_SIZE);
         card.setStyle(
-                "-fx-background-color: white;" +
-                        "-fx-background-radius: 16;"
+                "-fx-background-color: white;"
+                        + "-fx-background-radius: 16;"
         );
 
         Button backButton = new Button("←   Back to menu");
@@ -73,21 +80,32 @@ public final class StatisticsView extends VBox {
         getChildren().addAll(title, card, backButton);
     }
 
+    /**
+     * Creates a table cell.
+     *
+     * @param text text displayed in the cell
+     * @param header whether the cell is a header
+     * @return configured label
+     */
     private Label cell(String text, boolean header) {
-
         Label label = new Label(text);
 
         label.setStyle(
-                "-fx-text-fill: " + (header ? TITLE_COLOR : TEXT_COLOR) + ";" +
-                        "-fx-font-size: 16px;" +
-                        (header ? "-fx-font-weight: bold;" : "")
+                "-fx-text-fill: " + (header ? TITLE_COLOR : TEXT_COLOR) + ";"
+                        + "-fx-font-size: 16px;"
+                        + (header ? "-fx-font-weight: bold;" : "")
         );
 
         return label;
     }
 
+    /**
+     * Formats a time in seconds as minutes and seconds.
+     *
+     * @param seconds optional time in seconds
+     * @return formatted time or an em dash if unavailable
+     */
     private String formatTime(OptionalInt seconds) {
-
         if (seconds.isEmpty()) {
             return "—";
         }

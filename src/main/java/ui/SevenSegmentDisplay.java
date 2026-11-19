@@ -2,9 +2,12 @@ package ui;
 
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.paint.Color;
 import javafx.scene.effect.DropShadow;
+import javafx.scene.paint.Color;
 
+/**
+ * A seven-segment LED display for showing numbers and time.
+ */
 public final class SevenSegmentDisplay extends Canvas {
 
     private static final int DIGIT_WIDTH = 30;
@@ -23,7 +26,6 @@ public final class SevenSegmentDisplay extends Canvas {
     private static final Color OFF = Color.rgb(65, 0, 0);
 
     private static final boolean[][] SEGMENTS = {
-
             {true, true, true, true, true, true, false},
             {false, true, true, false, false, false, false},
             {true, true, false, true, true, false, true},
@@ -37,7 +39,6 @@ public final class SevenSegmentDisplay extends Canvas {
     };
 
     private static final double[][] POSITIONS = {
-
             {5, 2, 18, 4},
             {23, 5, 4, 14},
             {23, 22, 4, 14},
@@ -47,15 +48,20 @@ public final class SevenSegmentDisplay extends Canvas {
             {5, 19, 18, 4}
     };
 
+    /**
+     * Creates a display with three digits.
+     */
     public SevenSegmentDisplay() {
         this(3, false);
     }
 
-    public SevenSegmentDisplay(
-            int digits,
-            boolean showColon
-    ) {
-
+    /**
+     * Creates a seven-segment display.
+     *
+     * @param digits number of digits
+     * @param showColon whether to display a colon
+     */
+    public SevenSegmentDisplay(int digits, boolean showColon) {
         super(
                 showColon
                         ? (digits * DIGIT_WIDTH + 8) * SCALE_X
@@ -76,8 +82,12 @@ public final class SevenSegmentDisplay extends Canvas {
         setValue(0);
     }
 
+    /**
+     * Sets the numeric value displayed.
+     *
+     * @param value value to display
+     */
     public void setValue(int value) {
-
         int max = (int) Math.pow(10, digits) - 1;
 
         value = Math.max(0, Math.min(value, max));
@@ -90,8 +100,12 @@ public final class SevenSegmentDisplay extends Canvas {
         drawDisplay(text);
     }
 
+    /**
+     * Sets the time displayed in minutes and seconds.
+     *
+     * @param totalSeconds total time in seconds
+     */
     public void setTime(int totalSeconds) {
-
         totalSeconds = Math.max(0, totalSeconds);
 
         int minutes = totalSeconds / 60;
@@ -110,21 +124,24 @@ public final class SevenSegmentDisplay extends Canvas {
         drawDisplay(timeText);
     }
 
-
+    /**
+     * Draws a single digit using seven segments.
+     *
+     * @param gc graphics context
+     * @param digit digit to draw
+     * @param x horizontal position
+     */
     private void drawDigit(
             GraphicsContext gc,
             int digit,
             double x
     ) {
-
         boolean[] active = SEGMENTS[digit];
 
         for (int i = 0; i < 7; i++) {
-
             double[] p = POSITIONS[i];
 
             if (active[i]) {
-
                 gc.setFill(ON);
 
                 gc.setEffect(
@@ -133,9 +150,7 @@ public final class SevenSegmentDisplay extends Canvas {
                                 Color.rgb(255, 0, 0, 0.65)
                         )
                 );
-
             } else {
-
                 gc.setEffect(null);
                 gc.setFill(OFF);
             }
@@ -153,8 +168,12 @@ public final class SevenSegmentDisplay extends Canvas {
         gc.setEffect(null);
     }
 
+    /**
+     * Draws the complete display.
+     *
+     * @param text text to display
+     */
     private void drawDisplay(String text) {
-
         GraphicsContext gc = getGraphicsContext2D();
 
         gc.save();
@@ -178,7 +197,6 @@ public final class SevenSegmentDisplay extends Canvas {
                 : -1;
 
         for (int i = 0; i < text.length(); i++) {
-
             char character = text.charAt(i);
 
             if (character == ' ') {
@@ -197,7 +215,6 @@ public final class SevenSegmentDisplay extends Canvas {
         }
 
         if (showColon) {
-
             double x = colonPosition * DIGIT_WIDTH + 1;
 
             gc.setEffect(null);
@@ -210,6 +227,7 @@ public final class SevenSegmentDisplay extends Canvas {
         gc.restore();
     }
 }
+
 
 
 

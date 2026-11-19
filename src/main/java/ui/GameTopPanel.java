@@ -2,12 +2,16 @@ package ui;
 
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.layout.ColumnConstraints;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.ColumnConstraints;
-import javafx.scene.layout.Priority;
 
+/**
+ * Represents the top panel of the Minesweeper game.
+ * Displays the mine counter, timer and restart button.
+ */
 public final class GameTopPanel extends StackPane {
 
     private final SevenSegmentDisplay mineDisplay =
@@ -18,16 +22,20 @@ public final class GameTopPanel extends StackPane {
 
     private final FaceButton faceButton;
 
-    public GameTopPanel(Runnable restartAction) {
-
+    /**
+     * Creates the game top panel.
+     *
+     * @param restartAction action performed when the face button is clicked
+     */
+    public GameTopPanel(final Runnable restartAction) {
         faceButton = new FaceButton(restartAction);
 
         getStyleClass().add("game-top-panel");
 
         // Mine counter
-        Label mineLabel = new Label("MINES");
+        final Label mineLabel = new Label("MINES");
 
-        VBox mineBox = new VBox(
+        final VBox mineBox = new VBox(
                 4,
                 mineLabel,
                 mineDisplay
@@ -36,9 +44,9 @@ public final class GameTopPanel extends StackPane {
         mineBox.setAlignment(Pos.CENTER_LEFT);
 
         // Timer
-        Label timeLabel = new Label("TIME");
+        final Label timeLabel = new Label("TIME");
 
-        VBox timeBox = new VBox(
+        final VBox timeBox = new VBox(
                 4,
                 timeLabel,
                 timeDisplay
@@ -47,15 +55,15 @@ public final class GameTopPanel extends StackPane {
         timeBox.setAlignment(Pos.CENTER_RIGHT);
 
         // Two equally wide halves of the panel
-        GridPane grid = new GridPane();
+        final GridPane grid = new GridPane();
 
-        ColumnConstraints leftColumn =
+        final ColumnConstraints leftColumn =
                 new ColumnConstraints();
 
         leftColumn.setPercentWidth(50);
         leftColumn.setHgrow(Priority.ALWAYS);
 
-        ColumnConstraints rightColumn =
+        final ColumnConstraints rightColumn =
                 new ColumnConstraints();
 
         rightColumn.setPercentWidth(50);
@@ -74,8 +82,8 @@ public final class GameTopPanel extends StackPane {
         grid.add(mineBox, 0, 0);
         grid.add(timeBox, 1, 0);
 
-        // The emoji is displayed over the grid, perfectly centered.
-        StackPane faceContainer = new StackPane(faceButton);
+        // Center the face button over the grid
+        final StackPane faceContainer = new StackPane(faceButton);
 
         faceContainer.setAlignment(Pos.CENTER);
 
@@ -87,19 +95,34 @@ public final class GameTopPanel extends StackPane {
         setAlignment(Pos.CENTER);
     }
 
-    public void updateMines(int mines) {
+    /**
+     * Updates the displayed number of remaining mines.
+     *
+     * @param mines number of remaining mines
+     */
+    public void updateMines(final int mines) {
         mineDisplay.setValue(mines);
     }
 
-    public void updateTime(int seconds) {
+    /**
+     * Updates the game timer.
+     *
+     * @param seconds elapsed game time in seconds
+     */
+    public void updateTime(final int seconds) {
         timeDisplay.setTime(seconds);
     }
 
-    public void setFace(FaceButton.Face face) {
+    /**
+     * Changes the face button appearance.
+     *
+     * @param face new face state
+     */
+    public void setFace(final FaceButton.Face face) {
         faceButton.setFace(face);
     }
-
 }
+
 
 
 

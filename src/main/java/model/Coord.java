@@ -2,27 +2,51 @@ package model;
 
 import java.util.Objects;
 
+/**
+ * Represents an immutable coordinate on a two-dimensional plane.
+ */
 public final class Coord {
 
-    private final int x;
-    private final int y;
+    private final int coordinateX;
+    private final int coordinateY;
 
-    public Coord(int x, int y) {
-        this.x = x;
-        this.y = y;
+    /**
+     * Creates a coordinate with the specified X and Y values.
+     *
+     * @param coordinateX the X coordinate
+     * @param coordinateY the Y coordinate
+     */
+    public Coord(int coordinateX, int coordinateY) {
+        this.coordinateX = coordinateX;
+        this.coordinateY = coordinateY;
     }
 
+    /**
+     * Returns the X coordinate.
+     *
+     * @return the X coordinate
+     */
     public int getX() {
-        return x;
+        return coordinateX;
     }
 
+    /**
+     * Returns the Y coordinate.
+     *
+     * @return the Y coordinate
+     */
     public int getY() {
-        return y;
+        return coordinateY;
     }
 
+    /**
+     * Checks whether the specified object is equal to this coordinate.
+     *
+     * @param object the object to compare
+     * @return true if both coordinates have the same X and Y values
+     */
     @Override
     public boolean equals(Object object) {
-
         if (this == object) {
             return true;
         }
@@ -31,12 +55,19 @@ public final class Coord {
             return false;
         }
 
-        return x == coord.x && y == coord.y;
+        return coordinateX == coord.coordinateX
+                && coordinateY == coord.coordinateY;
     }
 
+    /**
+     * Returns the hash code of this coordinate.
+     *
+     * @return the hash code based on X and Y coordinates
+     */
     @Override
     public int hashCode() {
-        return Objects.hash(x, y);
+        return Objects.hash(coordinateX, coordinateY);
     }
 }
+
 

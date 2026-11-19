@@ -31,7 +31,6 @@ final class TrophyIcon extends Group {
     private final Timeline spinAnimation;
 
     TrophyIcon() {
-
         art = createArt();
         getChildren().add(art);
 
@@ -40,7 +39,6 @@ final class TrophyIcon extends Group {
     }
 
     void start() {
-
         setScaleX(0);
         setScaleY(0);
 
@@ -49,23 +47,22 @@ final class TrophyIcon extends Group {
     }
 
     void stop() {
-
         popAnimation.stop();
         spinAnimation.stop();
     }
 
-    // figure
+    // Figure
 
     private Group createArt() {
-
         LinearGradient gold = new LinearGradient(
                 0, 0, 1, 1, true, CycleMethod.NO_CYCLE,
                 new Stop(0, Color.web("#f6d365")),
-                new Stop(1, Color.web("#d4a63a")));
+                new Stop(1, Color.web("#d4a63a"))
+        );
 
         // The handles are drawn first so that the bowl overlaps their edges.
-        SVGPath leftHandle = handle("M-29 -30 C-54 -30 -50 0 -22 6");
-        SVGPath rightHandle = handle("M29 -30 C54 -30 50 0 22 6");
+        final SVGPath leftHandle = handle("M-29 -30 C-54 -30 -50 0 -22 6");
+        final SVGPath rightHandle = handle("M29 -30 C54 -30 50 0 22 6");
 
         SVGPath cup = new SVGPath();
         cup.setContent("M-30 -38 H30 V-8 A30 30 0 0 1 -30 -8 Z");
@@ -98,8 +95,12 @@ final class TrophyIcon extends Group {
         for (int i = 0; i < 10; i++) {
             double r = (i % 2 == 0) ? 10 : 4.5;
             double a = -Math.PI / 2 + i * Math.PI / 5;
-            star.getPoints().addAll(r * Math.cos(a), -14 + r * Math.sin(a));
+            star.getPoints().addAll(
+                    r * Math.cos(a),
+                    -14 + r * Math.sin(a)
+            );
         }
+
         star.setFill(Color.web("#fff3c4"));
         star.setStroke(OUTLINE);
         star.setStrokeWidth(1.5);
@@ -117,7 +118,6 @@ final class TrophyIcon extends Group {
     }
 
     private static SVGPath handle(String path) {
-
         SVGPath handle = new SVGPath();
         handle.setContent(path);
         handle.setFill(Color.TRANSPARENT);
@@ -131,44 +131,61 @@ final class TrophyIcon extends Group {
     // Animations
 
     private Timeline createPopAnimation() {
-
         return new Timeline(
                 new KeyFrame(Duration.ZERO,
                         new KeyValue(scaleXProperty(), 0),
-                        new KeyValue(scaleYProperty(), 0)),
+                        new KeyValue(scaleYProperty(), 0)
+                ),
                 new KeyFrame(Duration.millis(350),
-                        new KeyValue(scaleXProperty(), 1.15, Interpolator.EASE_OUT),
-                        new KeyValue(scaleYProperty(), 1.15, Interpolator.EASE_OUT)),
+                        new KeyValue(
+                                scaleXProperty(), 1.15, Interpolator.EASE_OUT
+                        ),
+                        new KeyValue(
+                                scaleYProperty(), 1.15, Interpolator.EASE_OUT
+                        )
+                ),
                 new KeyFrame(Duration.millis(550),
-                        new KeyValue(scaleXProperty(), 1, Interpolator.EASE_BOTH),
-                        new KeyValue(scaleYProperty(), 1, Interpolator.EASE_BOTH))
+                        new KeyValue(
+                                scaleXProperty(), 1, Interpolator.EASE_BOTH
+                        ),
+                        new KeyValue(
+                                scaleYProperty(), 1, Interpolator.EASE_BOTH
+                        )
+                )
         );
     }
 
-    // Coin-like rotation: scaleX = cos(at an angle), a thin strip remains visible when viewed edge-on.
+    /**
+     * Coin-like rotation: scaleX follows cosine of the angle.
+     * A thin strip remains visible when viewed edge-on.
+     */
     private Timeline createSpinAnimation() {
-
         SimpleDoubleProperty angle = new SimpleDoubleProperty(0);
 
         angle.addListener((obs, oldValue, newValue) -> {
-
-            double c = Math.cos(newValue.doubleValue());
+            double currentAngle = newValue.doubleValue();
+            double c = Math.cos(currentAngle);
             double sign = c < 0 ? -1 : 1;
 
             art.setScaleX(sign * Math.max(Math.abs(c), 0.06));
-            art.setTranslateY(Math.sin(newValue.doubleValue() * 2) * 3);
+            art.setTranslateY(Math.sin(currentAngle * 2) * 3);
         });
 
         Timeline spin = new Timeline(
                 new KeyFrame(Duration.ZERO,
-                        new KeyValue(angle, 0)),
+                        new KeyValue(angle, 0)
+                ),
                 new KeyFrame(Duration.seconds(2.4),
-                        new KeyValue(angle, 2 * Math.PI, Interpolator.LINEAR))
+                        new KeyValue(
+                                angle, 2 * Math.PI, Interpolator.LINEAR
+                        )
+                )
         );
 
         spin.setCycleCount(Animation.INDEFINITE);
-        spin.setDelay(Duration.millis(550));   // after the «jump»
+        spin.setDelay(Duration.millis(550));
 
         return spin;
     }
 }
+

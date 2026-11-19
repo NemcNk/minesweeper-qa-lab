@@ -27,6 +27,12 @@ public final class ResultOverlay extends StackPane {
     private TrophyIcon trophy;
     private PauseTransition bombDelay;
 
+    /**
+     * Creates the result overlay.
+     *
+     * @param onPlayAgain action executed when the player chooses to play again
+     * @param onMainMenu action executed when the player returns to the main menu
+     */
     public ResultOverlay(Runnable onPlayAgain, Runnable onMainMenu) {
 
         var stream = getClass().getResourceAsStream("/images/iconModern.png");
@@ -61,11 +67,11 @@ public final class ResultOverlay extends StackPane {
         menuButton.getStyleClass().add("result-link-button");
         menuButton.setOnAction(e -> onMainMenu.run());
 
-        // fixed size for the icon
+        // Fixed size for the icon.
         iconBox.setMinSize(150, 150);
         iconBox.setPrefSize(150, 150);
         iconBox.setMaxSize(150, 150);
-        iconBox.setViewOrder(-1);   // Explosion fragments are rendered on top of the text.
+        iconBox.setViewOrder(-1);
 
         VBox card = new VBox(
                 6, iconBox, titleLabel, subtitleLabel, divider,
@@ -74,11 +80,18 @@ public final class ResultOverlay extends StackPane {
         card.getStyleClass().add("result-card");
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(300);
-        card.setMaxHeight(Region.USE_PREF_SIZE);
+        card.setMaxHeight(USE_PREF_SIZE);
 
         getChildren().addAll(fireworks, card);
     }
 
+    /**
+     * Displays the result screen.
+     *
+     * @param won whether the player won the game
+     * @param subtitle additional result message
+     * @param seconds elapsed game time in seconds
+     */
     public void show(boolean won, String subtitle, int seconds) {
 
         stopEffects();
@@ -90,9 +103,9 @@ public final class ResultOverlay extends StackPane {
         );
         primaryButton.setText(won ? "Play Again" : "Try Again");
 
-        // An opaque background covers the game board, panel, and buttons underneath.
+        // An opaque background covers the game board and underlying controls.
         setStyle(won
-                ? "-fx-background-color: #1c2333;"     // A dark “sky” background for the fireworks.
+                ? "-fx-background-color: #1c2333;"
                 : "-fx-background-color: #faf9f6;");
 
         if (won) {
@@ -109,12 +122,18 @@ public final class ResultOverlay extends StackPane {
         fade.play();
     }
 
+    /**
+     * Hides the result screen and stops all animations.
+     */
     public void hide() {
 
         stopEffects();
         setVisible(false);
     }
 
+    /**
+     * Displays the trophy animation and fireworks.
+     */
     private void showTrophy() {
 
         trophy = new TrophyIcon();
@@ -124,6 +143,9 @@ public final class ResultOverlay extends StackPane {
         fireworks.start();
     }
 
+    /**
+     * Displays the bomb animation followed by an explosion.
+     */
     private void showExplodingBomb() {
 
         BombIconAnimation bomb = new BombIconAnimation(bombImage, false);
@@ -134,6 +156,9 @@ public final class ResultOverlay extends StackPane {
         bombDelay.play();
     }
 
+    /**
+     * Stops all active animations and clears the icon container.
+     */
     private void stopEffects() {
 
         fireworks.stop();

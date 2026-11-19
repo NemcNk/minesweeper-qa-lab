@@ -1,8 +1,8 @@
 package core;
 
-import model.Coord;
-
 import java.util.Set;
+
+import model.Coord;
 
 /**
  * Strategy that decides where the bombs are.
@@ -22,3 +22,4 @@ interface BombPlacement {
      */
     Set<Coord> place(BoardGeometry geometry, int bombs, Coord safeCoord);
 }
+

@@ -18,3 +18,4 @@ interface Ticker {
     /** Stops ticking. */
     void stop();
 }
+

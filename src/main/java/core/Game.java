@@ -1,5 +1,8 @@
 package core;
 
+import java.util.ArrayDeque;
+import java.util.Random;
+
 import model.CellContent;
 import model.CellSnapshot;
 import model.CellState;
@@ -7,16 +10,12 @@ import model.Coord;
 import model.GameConfig;
 import model.GameState;
 
-import java.util.ArrayDeque;
-import java.util.Random;
-
 /**
- * Minesweeper rules and game state. No UI dependencies.
+ * Implements Minesweeper game rules and manages the game state.
  *
- * <p>Lifecycle: the game starts in {@link GameState#PLAYING} with no bombs
- * placed. The first accepted left click places the bombs, then the game ends
- * in {@link GameState#WON}, {@link GameState#LOST_BOMB} or
- * {@link GameState#TIMEOUT}. {@link #start()} begins a new game.
+ * <p>The game starts in the PLAYING state without generated bombs.
+ * The first accepted left click generates the bomb layout.
+ * The game ends when the player wins, hits a bomb, or runs out of time.
  */
 public final class Game implements BoardReader {
 
@@ -27,11 +26,11 @@ public final class Game implements BoardReader {
     private GameState state;
 
     /**
-     * Creates a game with random bomb placement.
+     * Creates a new game with randomly generated bomb placement.
      *
-     * @throws IllegalArgumentException if the bombs do not fit outside
-     *                                  a 3x3 safe area (or the whole board,
-     *                                  if it is smaller)
+     * @param config game configuration
+     * @throws IllegalArgumentException if bombs do not fit outside
+     *                                  the initial safe area
      */
     public Game(GameConfig config) {
         this(
@@ -40,9 +39,15 @@ public final class Game implements BoardReader {
         );
     }
 
-    // Package-private constructor for tests: the caller chooses the bomb layout
+    /**
+     * Creates a game with a custom bomb placement strategy.
+     *
+     * <p>This constructor is package-private and intended for tests.
+     *
+     * @param config game configuration
+     * @param placement bomb placement strategy
+     */
     Game(GameConfig config, BombPlacement placement) {
-
         geometry = new BoardGeometry(
                 config.getColumns(),
                 config.getRows()
@@ -62,8 +67,19 @@ public final class Game implements BoardReader {
         start();
     }
 
-    private static GameConfig requireRoomForSafeArea(GameConfig config) {
-
+    /**
+     * Validates that enough cells are available for the initial safe area.
+     *
+     * <p>The safe area contains up to nine cells. On smaller boards,
+     * the entire board is treated as the safe area.
+     *
+     * @param config game configuration
+     * @return validated configuration
+     * @throws IllegalArgumentException if too many bombs are configured
+     */
+    private static GameConfig requireRoomForSafeArea(
+            GameConfig config
+    ) {
         long cells = (long) config.getColumns() * config.getRows();
         long safeArea = Math.min(9L, cells);
 
@@ -77,61 +93,83 @@ public final class Game implements BoardReader {
     }
 
     /**
-     * Starts a new game: clears the board and forgets the bomb layout.
+     * Starts a new game and resets the board.
+     *
+     * <p>The previous bomb layout is discarded and will be generated
+     * again after the first accepted left click.
      */
     public void start() {
-
         bombMap.reset();
         boardState.start();
 
         state = GameState.PLAYING;
     }
 
+    /**
+     * Returns the current game state.
+     *
+     * @return current game state
+     */
     public GameState getState() {
         return state;
     }
 
+    /**
+     * Returns the number of board columns.
+     *
+     * @return number of columns
+     */
     @Override
     public int getColumns() {
         return geometry.getColumns();
     }
 
+    /**
+     * Returns the number of board rows.
+     *
+     * @return number of rows
+     */
     @Override
     public int getRows() {
         return geometry.getRows();
     }
 
     /**
-     * @return {@code true} once the first click has placed the bombs
+     * Checks whether the bomb layout has already been generated.
+     *
+     * @return true if bombs have been placed
      */
     public boolean isStarted() {
         return bombMap.isGenerated();
     }
 
     /**
-     * @return bombs minus flags placed; may be zero but never negative,
-     *         because flags are limited by the bomb count
+     * Returns the number of bombs that have not been flagged yet.
+     *
+     * @return remaining bomb count
      */
     public int getRemainingBombs() {
-
         return bombMap.getTotalBombs()
                 - boardState.getFlaggedCount();
     }
 
     /**
-     * Returns a snapshot of a cell.
+     * Returns a snapshot of the specified cell.
      *
-     * <p>Before the first click every cell has content
-     * {@link CellContent#ZERO}, because bombs are not placed yet. After the
-     * start the snapshot carries the real content even for closed cells, so
-     * a renderer must not show the content of cells that are not opened.
+     * <p>Before the first click, every cell contains ZERO because
+     * the bomb layout has not been generated yet.
      *
-     * @throws IndexOutOfBoundsException if {@code coord} is {@code null}
+     * <p>After generation, snapshots contain the actual cell content,
+     * including for closed cells. The renderer must avoid displaying
+     * hidden content.
+     *
+     * @param coord cell coordinates
+     * @return immutable cell snapshot
+     * @throws IndexOutOfBoundsException if coordinates are null
      *                                   or outside the board
      */
     @Override
     public CellSnapshot getCell(Coord coord) {
-
         if (!geometry.inRange(coord)) {
             throw new IndexOutOfBoundsException(
                     "Coordinate outside board"
@@ -151,33 +189,28 @@ public final class Game implements BoardReader {
     }
 
     /**
-     * Handles a left click.
+     * Handles a left mouse button click.
      *
-     * <p>The first accepted click places the bombs. Behaviour by cell state:
-     * <ul>
-     *   <li>closed: the cell is opened; an empty cell also opens the whole
-     *       connected empty area and its border; a bomb ends the game with
-     *       {@link GameState#LOST_BOMB};</li>
-     *   <li>opened number ("chord"): if the number of flags around equals the
-     *       number, all closed neighbours are opened (a wrongly placed flag
-     *       can therefore lose the game);</li>
-     *   <li>flagged: ignored.</li>
-     * </ul>
-     * Opening the last safe cell sets {@link GameState#WON}.
+     * <p>The first accepted click generates bombs while preserving
+     * the initial safe area.
      *
-     * <p>The call is silently ignored if the game is not in
-     * {@link GameState#PLAYING}, if {@code coord} is {@code null} or outside
-     * the board, or if the game has not started and the cell is not closed.
+     * <p>Clicking a closed cell opens it. Empty cells trigger
+     * flood-fill expansion. Clicking an opened number performs
+     * a chord operation when the surrounding flag count matches
+     * the number.
+     *
+     * <p>Flagged cells cannot be opened.
+     *
+     * @param coord clicked cell coordinates
      */
     public void pressLeftButton(Coord coord) {
-
         if (state != GameState.PLAYING
                 || !geometry.inRange(coord)) {
             return;
         }
 
+        // Generate the bomb layout on the first accepted click.
         if (!isStarted()) {
-
             if (boardState.get(coord) != CellState.CLOSED) {
                 return;
             }
@@ -187,19 +220,19 @@ public final class Game implements BoardReader {
 
         openBox(coord);
 
+        // Check whether all safe cells have been opened.
         checkWinner();
     }
 
     /**
-     * Toggles a flag on a closed or flagged cell. A new flag is not placed
-     * once the number of flags equals the number of bombs. Works before the
-     * first left click.
+     * Handles a right mouse button click.
      *
-     * <p>Silently ignored if the game is not in {@link GameState#PLAYING},
-     * or if {@code coord} is {@code null} or outside the board.
+     * <p>Toggles a flag on a closed or flagged cell.
+     * The number of flags cannot exceed the total bomb count.
+     *
+     * @param coord clicked cell coordinates
      */
     public void pressRightButton(Coord coord) {
-
         if (state != GameState.PLAYING
                 || !geometry.inRange(coord)) {
             return;
@@ -209,11 +242,12 @@ public final class Game implements BoardReader {
     }
 
     /**
-     * Ends a started game as a loss by time and reveals the board.
-     * Ignored if the game is not in progress or has not started.
+     * Ends the game because the time limit has expired.
+     *
+     * <p>The board is revealed only if bomb placement has already
+     * occurred and the game is still in progress.
      */
     public void timeout() {
-
         if (state != GameState.PLAYING || !isStarted()) {
             return;
         }
@@ -223,45 +257,53 @@ public final class Game implements BoardReader {
         revealBoard(null);
     }
 
+    /**
+     * Opens a cell according to its current state.
+     *
+     * @param coord cell coordinates
+     */
     private void openBox(Coord coord) {
-
         switch (boardState.get(coord)) {
-
-            case OPENED:
-                openClosedBoxesAroundNumber(coord);
-                return;
-
-            case CLOSED:
-
-                CellContent content = bombMap.get(coord);
-
-                if (content == CellContent.BOMB) {
-                    openBombs(coord);
-                    return;
-                }
-
-                if (content == CellContent.ZERO) {
-                    openEmptyArea(coord);
-                } else {
-                    boardState.setOpened(coord);
-                }
-
-                return;
-
-            default:
-                return;
+            case OPENED -> openClosedBoxesAroundNumber(coord);
+            case CLOSED -> openClosedBox(coord);
+            default -> {
+                // Flagged and revealed cells cannot be opened.
+            }
         }
     }
 
-    private void openEmptyArea(Coord start) {
+    /**
+     * Opens a closed cell or handles a bomb or empty cell.
+     *
+     * @param coord cell coordinates
+     */
+    private void openClosedBox(Coord coord) {
+        CellContent content = bombMap.get(coord);
 
+        if (content == CellContent.BOMB) {
+            openBombs(coord);
+        } else if (content == CellContent.ZERO) {
+            openEmptyArea(coord);
+        } else {
+            boardState.setOpened(coord);
+        }
+    }
+
+    /**
+     * Opens a connected empty area and its numbered border.
+     *
+     * <p>Uses breadth-first search to avoid recursive calls
+     * and potential stack overflow on large boards.
+     *
+     * @param start starting cell coordinates
+     */
+    private void openEmptyArea(Coord start) {
         ArrayDeque<Coord> queue = new ArrayDeque<>();
 
         queue.addLast(start);
 
         while (!queue.isEmpty()
                 && state == GameState.PLAYING) {
-
             Coord coord = queue.removeFirst();
 
             if (boardState.get(coord) != CellState.CLOSED) {
@@ -272,11 +314,9 @@ public final class Game implements BoardReader {
 
             boardState.setOpened(coord);
 
+            // Expand only from empty cells.
             if (content == CellContent.ZERO) {
-
-                for (Coord around :
-                        geometry.getCoordsAround(coord)) {
-
+                for (Coord around : geometry.getCoordsAround(coord)) {
                     if (boardState.get(around) == CellState.CLOSED) {
                         queue.addLast(around);
                     }
@@ -285,8 +325,15 @@ public final class Game implements BoardReader {
         }
     }
 
+    /**
+     * Opens all closed neighbours of an opened numbered cell
+     * when the surrounding flag count matches its number.
+     *
+     * <p>A wrongly placed flag can cause the player to hit a bomb.
+     *
+     * @param coord opened numbered cell coordinates
+     */
     private void openClosedBoxesAroundNumber(Coord coord) {
-
         CellContent content = bombMap.get(coord);
 
         if (!content.isNumber()
@@ -300,10 +347,9 @@ public final class Game implements BoardReader {
             return;
         }
 
+        // Open each closed neighbour until the game ends.
         for (Coord around : geometry.getCoordsAround(coord)) {
-
             if (boardState.get(around) == CellState.CLOSED) {
-
                 openBox(around);
 
                 if (state != GameState.PLAYING) {
@@ -313,19 +359,28 @@ public final class Game implements BoardReader {
         }
     }
 
-    // Loss caused by opening a bomb
+    /**
+     * Ends the game after the player opens a bomb.
+     *
+     * @param bombedCoord coordinates of the exploded bomb
+     */
     private void openBombs(Coord bombedCoord) {
-
         state = GameState.LOST_BOMB;
 
         revealBoard(bombedCoord);
     }
 
-    // Reveals the whole board after a loss
+    /**
+     * Reveals the entire board after the game ends.
+     *
+     * <p>The exploded bomb is marked separately. Other bombs
+     * are revealed, and incorrectly flagged safe cells are marked.
+     *
+     * @param bombedCoord coordinates of the exploded bomb,
+     *                    or null when the game ends by timeout
+     */
     private void revealBoard(Coord bombedCoord) {
-
         for (Coord coord : geometry.getAllCoords()) {
-
             if (coord.equals(bombedCoord)) {
                 boardState.setExploded(coord);
                 continue;
@@ -339,18 +394,22 @@ public final class Game implements BoardReader {
         }
     }
 
+    /**
+     * Checks whether every safe cell has been opened.
+     *
+     * <p>The game is won only while it is still in progress.
+     */
     private void checkWinner() {
-
         int safeCells =
                 getColumns() * getRows()
                         - bombMap.getTotalBombs();
 
         if (state == GameState.PLAYING
                 && boardState.getOpenedSafeCount() == safeCells) {
-
             state = GameState.WON;
         }
     }
 }
+
 
 

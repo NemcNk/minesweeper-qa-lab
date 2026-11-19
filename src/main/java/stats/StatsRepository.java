@@ -14,3 +14,4 @@ public interface StatsRepository {
 
     DifficultyStats get(Difficulty difficulty);
 }
+

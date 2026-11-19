@@ -3,8 +3,8 @@ package ui;
 import java.util.function.IntConsumer;
 
 /**
- * Countdown with pause. Knows nothing about the game or about JavaFX:
- * time comes from a {@link Ticker}, results go out through callbacks.
+ * Countdown timer with pause and resume support.
+ * Time is provided by a Ticker, and results are delivered through callbacks.
  */
 final class CountdownTimer {
 
@@ -16,7 +16,10 @@ final class CountdownTimer {
     private int remainingSeconds;
 
     /**
+     * Creates a countdown timer with the specified time limit.
+     *
      * @param limitSeconds start value, must be positive
+     * @param ticker       provides timer ticks
      * @param onTick       receives the remaining seconds after every tick
      *                     and after {@link #reset()}
      * @param onExpired    called once, after {@code onTick(0)}
@@ -28,7 +31,6 @@ final class CountdownTimer {
             IntConsumer onTick,
             Runnable onExpired
     ) {
-
         if (limitSeconds <= 0) {
             throw new IllegalArgumentException(
                     "Time limit must be positive"
@@ -60,7 +62,6 @@ final class CountdownTimer {
 
     /** Stops the timer and restores the initial time. */
     void reset() {
-
         ticker.stop();
         remainingSeconds = limitSeconds;
         onTick.accept(remainingSeconds);
@@ -75,11 +76,9 @@ final class CountdownTimer {
     }
 
     private void tick() {
-
         remainingSeconds--;
 
         if (remainingSeconds <= 0) {
-
             remainingSeconds = 0;
             ticker.stop();
 

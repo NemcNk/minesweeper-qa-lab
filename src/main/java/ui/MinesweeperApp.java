@@ -1,25 +1,32 @@
 package ui;
 
-import stats.InMemoryStatsRepository;
+import java.awt.Taskbar;
+import java.awt.Toolkit;
+import java.util.Objects;
 
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-import java.awt.Taskbar;
-import java.awt.Toolkit;
-import java.util.Objects;
+import stats.InMemoryStatsRepository;
 
+/**
+ * Main application class responsible for initializing and launching Minesweeper.
+ */
 public final class MinesweeperApp extends Application {
 
     private static final String ICON_PATH = "/images/iconModern.png";
     private static final String CSS_PATH = "/styles/application.css";
 
+    /**
+     * Initializes the application window, scene, styles, and icons.
+     *
+     * @param stage the primary application stage
+     */
     @Override
     public void start(Stage stage) {
-
-        // window icon (Windows / Linux)
+        // Set the application window icon.
         stage.getIcons().add(new Image(
                 Objects.requireNonNull(
                         getClass().getResourceAsStream(ICON_PATH),
@@ -34,6 +41,7 @@ public final class MinesweeperApp extends Application {
 
         Scene scene = new Scene(controller.createContent());
 
+        // Load the application stylesheet.
         scene.getStylesheets().add(
                 Objects.requireNonNull(
                         getClass().getResource(CSS_PATH),
@@ -46,21 +54,22 @@ public final class MinesweeperApp extends Application {
         stage.setResizable(false);
         stage.show();
 
-        // Dock icon (macOS)
+        // Set the application icon in the macOS Dock.
         setDockIcon();
     }
 
+    /**
+     * Sets the application icon in the macOS Dock when supported.
+     */
     private void setDockIcon() {
-
         try {
             if (Taskbar.isTaskbarSupported()) {
-
                 Taskbar taskbar = Taskbar.getTaskbar();
 
                 if (taskbar.isSupported(Taskbar.Feature.ICON_IMAGE)) {
-
                     var url = Objects.requireNonNull(
-                            getClass().getResource(ICON_PATH)
+                            getClass().getResource(ICON_PATH),
+                            "Icon not found: " + ICON_PATH
                     );
 
                     taskbar.setIconImage(
@@ -69,9 +78,7 @@ public final class MinesweeperApp extends Application {
                 }
             }
         } catch (Exception e) {
-            // the icon is not essential.
-            // It serves a purely decorative purpose
-            // and does not affect the functionality of Minesweeper.
+            // The application icon is purely decorative and does not affect functionality.
             e.printStackTrace();
         }
     }

@@ -12,7 +12,6 @@ final class BoardLayout {
     }
 
     static int cellSize(Difficulty difficulty) {
-
         return switch (difficulty) {
             case EASY -> 36;
             case MEDIUM -> 30;
@@ -22,3 +21,4 @@ final class BoardLayout {
         };
     }
 }
+

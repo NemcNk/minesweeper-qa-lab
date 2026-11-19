@@ -1,29 +1,32 @@
 package stats;
 
-import model.Difficulty;
-
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
 
+import model.Difficulty;
+
 /**
- * Statistics in memory: lives while the app is running.
+ * Statistics stored in memory while the application is running.
  */
 public final class InMemoryStatsRepository implements StatsRepository {
 
+    // Stores statistics separately for each difficulty level.
     private final Map<Difficulty, DifficultyStats> stats =
             new EnumMap<>(Difficulty.class);
 
     @Override
     public void recordWin(Difficulty difficulty, int seconds) {
-
+        // Get the current statistics for the selected difficulty.
         DifficultyStats current = get(difficulty);
 
+        // Keep the fastest completion time.
         int best = current.bestTimeSeconds().isPresent()
                 ? Math.min(current.bestTimeSeconds().getAsInt(), seconds)
                 : seconds;
 
+        // Update wins and the best completion time.
         stats.put(difficulty, new DifficultyStats(
                 current.wins() + 1,
                 current.losses(),
@@ -33,9 +36,10 @@ public final class InMemoryStatsRepository implements StatsRepository {
 
     @Override
     public void recordLoss(Difficulty difficulty) {
-
+        // Get the current statistics for the selected difficulty.
         DifficultyStats current = get(difficulty);
 
+        // Increment losses without changing wins or the best time.
         stats.put(difficulty, new DifficultyStats(
                 current.wins(),
                 current.losses() + 1,
@@ -45,9 +49,11 @@ public final class InMemoryStatsRepository implements StatsRepository {
 
     @Override
     public DifficultyStats get(Difficulty difficulty) {
-
+        // Ensure that the difficulty argument is not null.
         Objects.requireNonNull(difficulty);
 
+        // Return empty statistics if no records exist yet.
         return stats.getOrDefault(difficulty, DifficultyStats.EMPTY);
     }
 }
+

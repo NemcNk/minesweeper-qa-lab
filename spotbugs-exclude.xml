@@ -1,0 +1,8 @@
+<FindBugsFilter>
+    <!-- JavaFX: views must hand out scene-graph nodes and keep the Stage. -->
+    <!-- Defensive copies make no sense here. Rules stay active for core/model. -->
+    <Match>
+        <Package name="ui"/>
+        <Bug pattern="EI_EXPOSE_REP,EI_EXPOSE_REP2"/>
+    </Match>
+</FindBugsFilter>

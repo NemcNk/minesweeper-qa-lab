@@ -13,12 +13,18 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.util.Duration;
 
+/**
+ * Restart button with an animated smiley face.
+ */
 public final class FaceButton extends Canvas {
 
+    /**
+     * Represents the face states depending on the game result.
+     */
     public enum Face {
-        PLAYING,    // 🙂
-        LOST,       // 😵
-        WON         // 🤩
+        PLAYING,
+        LOST,
+        WON
     }
 
     private static final int SIZE = 42;
@@ -36,8 +42,12 @@ public final class FaceButton extends Canvas {
 
     private Face face = Face.PLAYING;
 
+    /**
+     * Creates a restart button.
+     *
+     * @param restartAction action performed when the button is clicked
+     */
     public FaceButton(Runnable restartAction) {
-
         super(SIZE, SIZE);
 
         setCursor(Cursor.HAND);
@@ -57,8 +67,12 @@ public final class FaceButton extends Canvas {
         draw();
     }
 
+    /**
+     * Sets a new face state.
+     *
+     * @param newFace the new face state
+     */
     public void setFace(Face newFace) {
-
         if (newFace == face) {
             return;
         }
@@ -71,21 +85,25 @@ public final class FaceButton extends Canvas {
         }
     }
 
+    /**
+     * Plays a scaling animation.
+     */
     private void pop() {
+        ScaleTransition transition =
+                new ScaleTransition(Duration.millis(140), this);
 
-        ScaleTransition t = new ScaleTransition(Duration.millis(140), this);
-        t.setFromX(0.8);
-        t.setFromY(0.8);
-        t.setToX(1);
-        t.setToY(1);
-        t.setInterpolator(Interpolator.EASE_OUT);
-        t.play();
+        transition.setFromX(0.8);
+        transition.setFromY(0.8);
+        transition.setToX(1);
+        transition.setToY(1);
+        transition.setInterpolator(Interpolator.EASE_OUT);
+        transition.play();
     }
 
-    // drawing
-
+    /**
+     * Redraws the button according to the current face state.
+     */
     private void draw() {
-
         GraphicsContext gc = getGraphicsContext2D();
 
         gc.clearRect(0, 0, getWidth(), getHeight());
@@ -102,13 +120,20 @@ public final class FaceButton extends Canvas {
             case PLAYING -> drawPlaying(gc);
             case LOST -> drawLost(gc);
             case WON -> drawWon(gc);
+            default -> throw new IllegalStateException(
+                    "Unknown face state: " + face
+            );
         }
 
         gc.restore();
     }
 
+    /**
+     * Draws the smiley face head.
+     *
+     * @param gc the graphics context
+     */
     private void drawHead(GraphicsContext gc) {
-
         gc.setFill(HEAD);
         gc.fillOval(4, 4, 92, 92);
 
@@ -120,9 +145,12 @@ public final class FaceButton extends Canvas {
         gc.fillOval(22, 8, 56, 26);
     }
 
-    // 🙂
+    /**
+     * Draws a smiling face.
+     *
+     * @param gc the graphics context
+     */
     private void drawPlaying(GraphicsContext gc) {
-
         eye(gc, 35, 41, 4.5, 6.5);
         eye(gc, 65, 41, 4.5, 6.5);
 
@@ -135,9 +163,12 @@ public final class FaceButton extends Canvas {
         gc.stroke();
     }
 
-    // 😵
+    /**
+     * Draws a losing face.
+     *
+     * @param gc the graphics context
+     */
     private void drawLost(GraphicsContext gc) {
-
         brows(gc);
 
         gc.setStroke(INK);
@@ -149,8 +180,12 @@ public final class FaceButton extends Canvas {
         openMouth(gc);
     }
 
+    /**
+     * Draws the eyebrows.
+     *
+     * @param gc the graphics context
+     */
     private static void brows(GraphicsContext gc) {
-
         gc.setStroke(INK);
         gc.setLineWidth(4);
 
@@ -165,19 +200,25 @@ public final class FaceButton extends Canvas {
         gc.stroke();
     }
 
+    /**
+     * Draws an open mouth.
+     *
+     * @param gc the graphics context
+     */
     private static void openMouth(GraphicsContext gc) {
-
         gc.setFill(INK);
         gc.fillOval(42, 60, 16, 24);
     }
 
-    // 🤩
+    /**
+     * Draws a winning face.
+     *
+     * @param gc the graphics context
+     */
     private void drawWon(GraphicsContext gc) {
-
         star(gc, 34, 40, 14, 6);
         star(gc, 66, 40, 14, 6);
 
-        // mouth
         gc.beginPath();
         gc.moveTo(26, 58);
         gc.lineTo(74, 58);
@@ -204,19 +245,40 @@ public final class FaceButton extends Canvas {
         gc.restore();
     }
 
-    // helpers
-
-    private static void eye(GraphicsContext gc,
-                            double cx, double cy,
-                            double rx, double ry) {
-
+    /**
+     * Draws an eye.
+     *
+     * @param gc the graphics context
+     * @param cx the horizontal center coordinate
+     * @param cy the vertical center coordinate
+     * @param rx the horizontal radius
+     * @param ry the vertical radius
+     */
+    private static void eye(
+            GraphicsContext gc,
+            double cx,
+            double cy,
+            double rx,
+            double ry
+    ) {
         gc.setFill(INK);
         gc.fillOval(cx - rx, cy - ry, rx * 2, ry * 2);
     }
 
-    private static void cross(GraphicsContext gc,
-                              double cx, double cy, double r) {
-
+    /**
+     * Draws a cross-shaped eye.
+     *
+     * @param gc the graphics context
+     * @param cx the horizontal center coordinate
+     * @param cy the vertical center coordinate
+     * @param r the cross size
+     */
+    private static void cross(
+            GraphicsContext gc,
+            double cx,
+            double cy,
+            double r
+    ) {
         gc.beginPath();
         gc.moveTo(cx - r, cy - r);
         gc.lineTo(cx + r, cy + r);
@@ -225,18 +287,31 @@ public final class FaceButton extends Canvas {
         gc.stroke();
     }
 
-    private static void star(GraphicsContext gc,
-                             double cx, double cy,
-                             double outer, double inner) {
-
+    /**
+     * Draws a five-pointed star.
+     *
+     * @param gc the graphics context
+     * @param cx the horizontal center coordinate
+     * @param cy the vertical center coordinate
+     * @param outer the outer radius
+     * @param inner the inner radius
+     */
+    private static void star(
+            GraphicsContext gc,
+            double cx,
+            double cy,
+            double outer,
+            double inner
+    ) {
         double[] xs = new double[10];
         double[] ys = new double[10];
 
         for (int i = 0; i < 10; i++) {
             double angle = -Math.PI / 2 + i * Math.PI / 5;
-            double r = (i % 2 == 0) ? outer : inner;
-            xs[i] = cx + r * Math.cos(angle);
-            ys[i] = cy + r * Math.sin(angle);
+            double radius = (i % 2 == 0) ? outer : inner;
+
+            xs[i] = cx + radius * Math.cos(angle);
+            ys[i] = cy + radius * Math.sin(angle);
         }
 
         gc.setFill(Color.web("#FF8F00"));
@@ -247,4 +322,5 @@ public final class FaceButton extends Canvas {
         gc.strokePolygon(xs, ys, 10);
     }
 }
+
 

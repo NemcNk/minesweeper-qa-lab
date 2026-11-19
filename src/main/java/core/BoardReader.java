@@ -13,6 +13,8 @@ public interface BoardReader {
     int getRows();
 
     /**
+     * Returns a snapshot of the specified cell.
+     *
      * @param coord a cell on the board
      * @return the snapshot, never {@code null}
      * @throws IndexOutOfBoundsException if {@code coord} is {@code null}

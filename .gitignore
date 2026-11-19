@@ -2,6 +2,7 @@
 target/
 !**/src/main/**/target/
 !**/src/test/**/target/
+badges/
 
 # IntelliJ IDEA
 .idea/

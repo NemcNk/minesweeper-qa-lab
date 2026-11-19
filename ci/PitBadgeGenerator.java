@@ -16,7 +16,7 @@ public final class PitBadgeGenerator {
             Path.of("target/pit-reports/mutations.xml");
 
     private static final Path OUTPUT =
-            Path.of("badges-output/mutation.svg");
+            Path.of("badges/mutation.svg");
 
     private PitBadgeGenerator() {
     }

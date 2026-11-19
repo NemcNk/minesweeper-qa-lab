@@ -17,7 +17,7 @@ public final class JacocoBadgeGenerator {
             Path.of("target/site/jacoco/jacoco.xml");
 
     private static final Path OUTPUT =
-            Path.of("badges-output");
+            Path.of("badges");
 
     private JacocoBadgeGenerator() {
     }

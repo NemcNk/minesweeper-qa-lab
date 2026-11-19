@@ -225,10 +225,6 @@ public final class Game implements BoardReader {
 
     private void openBox(Coord coord) {
 
-        if (state != GameState.PLAYING) {
-            return;
-        }
-
         switch (boardState.get(coord)) {
 
             case OPENED:
@@ -273,10 +269,6 @@ public final class Game implements BoardReader {
             }
 
             CellContent content = bombMap.get(coord);
-
-            if (content == CellContent.BOMB) {
-                continue;
-            }
 
             boardState.setOpened(coord);
 

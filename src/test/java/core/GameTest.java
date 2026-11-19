@@ -16,6 +16,7 @@ import java.util.Random;
 
 import static core.TestBoards.at;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class GameTest {
@@ -69,6 +70,32 @@ class GameTest {
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
+    @Test
+    void acceptsMaximumBombsThatLeaveSafeArea() {
+        // 16 cells - 9 safe = 7 bombs is the limit
+        assertThatCode(() -> new Game(new GameConfig(4, 4, 7)))
+                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> new Game(new GameConfig(4, 4, 8)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void smallBoardUsesWholeBoardAsSafeArea() {
+        // 2x2 = 4 cells, the safe area is min(9, 4) = 4, so 0 bombs fit
+        assertThatCode(() -> new Game(new GameConfig(2, 2, 0)))
+                .doesNotThrowAnyException();
+        assertThatThrownBy(() -> new Game(new GameConfig(2, 2, 1)))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void publicConstructorCreatesPlayableGame() {
+        Game game = new Game(Difficulty.EASY.createConfig());
+
+        assertThat(game.getState()).isEqualTo(GameState.PLAYING);
+        assertThat(game.getColumns()).isPositive();
+    }
+
     // opening cells
 
     @Test
@@ -92,6 +119,19 @@ class GameTest {
 
         assertThat(stateOf(game, 1, 1)).isEqualTo(CellState.OPENED);
         assertThat(stateOf(game, 2, 2)).isEqualTo(CellState.CLOSED);
+        assertThat(game.getState()).isEqualTo(GameState.PLAYING);
+    }
+
+    @Test
+    void clickingOpenedEmptyCellDoesNotOpenNeighbours() {
+        Game game = TestBoards.game("*...");
+
+        game.pressRightButton(at(3, 0));   // flag a cell the flood fill must skip
+        game.pressLeftButton(at(2, 0));    // opens (2,0); flagged (3,0) stays closed
+        game.pressRightButton(at(3, 0));   // unflag -> CLOSED again
+        game.pressLeftButton(at(2, 0));    // click an opened ZERO cell
+
+        assertThat(game.getCell(at(3, 0)).getState()).isEqualTo(CellState.CLOSED);
         assertThat(game.getState()).isEqualTo(GameState.PLAYING);
     }
 

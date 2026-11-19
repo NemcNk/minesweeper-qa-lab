@@ -1,4 +1,6 @@
-# Minesweeper (JavaFX)
+# Minesweeper (QA Lab)
+![Core Coverage](https://raw.githubusercontent.com/NemcNk/minesweeper/badges/core-coverage.svg)
+![Mutation](https://raw.githubusercontent.com/NemcNk/minesweeper/badges/mutation.svg)
 
 A Minesweeper game written in Java with JavaFX. The game rules are separated
 from the UI, which makes the core easy to test.

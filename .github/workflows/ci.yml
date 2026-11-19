@@ -4,10 +4,16 @@ on:
   push:
     branches: [ main, master ]
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
+    name: Build and test
     runs-on: ubuntu-26.04
+
     env:
       TZ: Asia/Almaty
 
@@ -30,6 +36,12 @@ jobs:
       - name: Build and test
         run: mvn -B -ntp verify
 
+      - name: Generate JaCoCo badges
+        run: |
+          mkdir -p target/ci
+          javac -d target/ci ci/JacocoBadgeGenerator.java
+          java -cp target/ci ci.JacocoBadgeGenerator
+
       - name: Upload test and coverage reports
         if: always()
         uses: actions/upload-artifact@v7
@@ -39,3 +51,94 @@ jobs:
           path: |
             target/surefire-reports
             target/site/jacoco
+
+      - name: Upload JaCoCo badges
+        uses: actions/upload-artifact@v7
+        with:
+          name: badges-output
+          if-no-files-found: error
+          path: badges-output/
+
+
+  mutation:
+    name: Mutation testing
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Set up JDK 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+      - name: Run PIT on the core package
+        run: |
+          mvn -B -ntp -Pmutation \
+            test-compile \
+            org.pitest:pitest-maven:mutationCoverage
+
+      - name: Generate PIT mutation badge
+        if: always()
+        run: |
+          mkdir -p target/ci
+
+          javac -d target/ci ci/PitBadgeGenerator.java
+
+          java -cp target/ci ci.PitBadgeGenerator
+
+      - name: Upload PIT report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: pit-report
+          if-no-files-found: ignore
+          path: target/pit-reports
+
+      - name: Upload mutation badge
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: mutation-badge
+          if-no-files-found: error
+          path: badges-output/mutation.svg
+
+
+  badges:
+    name: Publish badges
+    runs-on: ubuntu-26.04
+
+    needs: [ test, mutation ]
+
+    if: >
+      always() &&
+      needs.test.result == 'success' &&
+      github.event_name == 'push' &&
+      github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download JaCoCo badges
+        uses: actions/download-artifact@v4
+        with:
+          name: badges-output
+          path: badges-output
+
+      - name: Download PIT badge
+        uses: actions/download-artifact@v4
+        with:
+          name: mutation-badge
+          path: badges-output
+
+      - name: Publish badges to badges branch
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: badges
+          publish_dir: badges-output
+          force_orphan: true

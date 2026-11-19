@@ -77,11 +77,12 @@ class MatrixTest {
 
     @Test
     void writingOutsideBoardThrows() {
-
         Matrix<String> matrix = new Matrix<>(geometry, () -> "x");
 
+        // exact type + message: ArrayIndexOutOfBounds from the raw array must not pass
         assertThatThrownBy(() -> matrix.set(at(4, 0), "y"))
-                .isInstanceOf(IndexOutOfBoundsException.class);
+                .isExactlyInstanceOf(IndexOutOfBoundsException.class)
+                .hasMessage("Coordinate outside board");
     }
 
     @Test

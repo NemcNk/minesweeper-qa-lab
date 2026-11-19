@@ -90,4 +90,12 @@ class BoardGeometryTest {
         assertThat(geometry.getSafeArea(at(0, 0))).hasSize(4);
         assertThat(geometry.getSafeArea(at(0, 0))).contains(at(0, 0));
     }
+
+    @Test
+    void safeAreaOutsideBoardThrows() {
+        assertThatThrownBy(() -> geometry.getSafeArea(at(5, 0)))
+                .isInstanceOf(IndexOutOfBoundsException.class);
+        assertThatThrownBy(() -> geometry.getSafeArea(null))
+                .isInstanceOf(IndexOutOfBoundsException.class);
+    }
 }

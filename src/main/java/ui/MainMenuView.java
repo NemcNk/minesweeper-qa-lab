@@ -60,6 +60,7 @@ public final class MainMenuView extends VBox {
         Label title = new Label("Minesweeper");
 
         title.getStyleClass().add("menu-title");
+        title.setId(UiIds.MENU_TITLE);
         title.setMinWidth(USE_PREF_SIZE);
         title.setMaxWidth(Double.MAX_VALUE);
         title.setAlignment(Pos.CENTER);
@@ -97,6 +98,7 @@ public final class MainMenuView extends VBox {
             Button button = new Button();
             button.setGraphic(content);
             button.getStyleClass().add("difficulty-button");
+            button.setId(UiIds.difficultyButton(currentDifficulty));
             button.setMaxWidth(Double.MAX_VALUE);
 
             button.setOnAction(event -> {
@@ -116,6 +118,7 @@ public final class MainMenuView extends VBox {
         Button playButton = new Button("▷   Play Game");
 
         playButton.getStyleClass().add("play-button");
+        playButton.setId(UiIds.PLAY_BUTTON);
         playButton.setMaxWidth(Double.MAX_VALUE);
         applyCompactSize(playButton);
 
@@ -132,6 +135,7 @@ public final class MainMenuView extends VBox {
         Button statsButton = new Button("View Statistics");
 
         statsButton.getStyleClass().add("stats-link-button");
+        statsButton.setId(UiIds.STATISTICS_BUTTON);
         statsButton.setMaxWidth(Double.MAX_VALUE);
 
         HBox chartIcon = new HBox(

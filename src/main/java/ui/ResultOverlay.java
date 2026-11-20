@@ -44,11 +44,14 @@ public final class ResultOverlay extends StackPane {
         bombImage = new Image(stream);
 
         getStyleClass().add("result-overlay");
+        setId(UiIds.RESULT_OVERLAY);
         setAlignment(Pos.CENTER);
         setVisible(false);
 
         titleLabel.getStyleClass().add("result-title");
+        titleLabel.setId(UiIds.RESULT_TITLE);
         subtitleLabel.getStyleClass().add("result-subtitle");
+        subtitleLabel.setId(UiIds.RESULT_SUBTITLE);
 
         Region divider = new Region();
         divider.getStyleClass().add("result-divider");
@@ -58,13 +61,16 @@ public final class ResultOverlay extends StackPane {
         Label timeCaption = new Label("Your time");
         timeCaption.getStyleClass().add("result-time-caption");
         timeValueLabel.getStyleClass().add("result-time-value");
+        timeValueLabel.setId(UiIds.RESULT_TIME);
 
         primaryButton.getStyleClass().add("result-primary-button");
+        primaryButton.setId(UiIds.RESULT_PRIMARY_BUTTON);
         primaryButton.setMaxWidth(Double.MAX_VALUE);
         primaryButton.setOnAction(e -> onPlayAgain.run());
 
         Button menuButton = new Button("Main Menu");
         menuButton.getStyleClass().add("result-link-button");
+        menuButton.setId(UiIds.RESULT_MENU_BUTTON);
         menuButton.setOnAction(e -> onMainMenu.run());
 
         // Fixed size for the icon.

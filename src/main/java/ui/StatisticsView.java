@@ -32,6 +32,7 @@ public final class StatisticsView extends VBox {
         setSpacing(20);
 
         getStyleClass().add("menu-root");
+        setId(UiIds.STATISTICS_VIEW);
 
         Label title = new Label("Statistics");
         title.setStyle(
@@ -56,10 +57,18 @@ public final class StatisticsView extends VBox {
         for (Difficulty difficulty : Difficulty.values()) {
             DifficultyStats entry = stats.get(difficulty);
 
+            Label wins = cell(String.valueOf(entry.wins()), false);
+            Label losses = cell(String.valueOf(entry.losses()), false);
+            Label best = cell(formatTime(entry.bestTimeSeconds()), false);
+
+            wins.setId(UiIds.statsWins(difficulty));
+            losses.setId(UiIds.statsLosses(difficulty));
+            best.setId(UiIds.statsBestTime(difficulty));
+
             table.add(cell(difficulty.getTitle(), false), 0, row);
-            table.add(cell(String.valueOf(entry.wins()), false), 1, row);
-            table.add(cell(String.valueOf(entry.losses()), false), 2, row);
-            table.add(cell(formatTime(entry.bestTimeSeconds()), false), 3, row);
+            table.add(wins, 1, row);
+            table.add(losses, 2, row);
+            table.add(best, 3, row);
 
             row++;
         }
@@ -75,6 +84,7 @@ public final class StatisticsView extends VBox {
 
         Button backButton = new Button("←   Back to menu");
         backButton.getStyleClass().add("back-button");
+        backButton.setId(UiIds.STATISTICS_BACK_BUTTON);
         backButton.setOnAction(event -> backAction.run());
 
         getChildren().addAll(title, card, backButton);

@@ -79,6 +79,7 @@ public final class BoardView {
                 CellView cell = new CellView(cellSize);
 
                 cells[x][y] = cell;
+                cell.setId(UiIds.cell(x, y));
 
                 // Forward mouse click events to the provided handler.
                 cell.setOnMouseClicked(event ->
@@ -93,6 +94,7 @@ public final class BoardView {
         grid.setHgap(GAP);
         grid.setVgap(GAP);
         grid.setAlignment(Pos.CENTER);
+        grid.setId(UiIds.BOARD);
     }
 
     /**

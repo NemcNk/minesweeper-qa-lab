@@ -29,6 +29,9 @@ public final class GameTopPanel extends StackPane {
      */
     public GameTopPanel(final Runnable restartAction) {
         faceButton = new FaceButton(restartAction);
+        faceButton.setId(UiIds.FACE_BUTTON);
+        mineDisplay.setId(UiIds.MINES_DISPLAY);
+        timeDisplay.setId(UiIds.TIME_DISPLAY);
 
         getStyleClass().add("game-top-panel");
 

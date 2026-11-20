@@ -1,6 +1,7 @@
 package core;
 
 import java.util.ArrayDeque;
+import java.util.Objects;
 import java.util.Random;
 
 import model.CellContent;
@@ -16,12 +17,16 @@ import model.GameState;
  * <p>The game starts in the PLAYING state without generated bombs.
  * The first accepted left click generates the bomb layout.
  * The game ends when the player wins, hits a bomb, or runs out of time.
+ *
+ * <p>Key events (start, flags, end) are reported to a
+ * {@link GameEventListener}.
  */
 public final class Game implements BoardReader {
 
     private final BoardGeometry geometry;
     private final BombMap bombMap;
     private final BoardState boardState;
+    private final GameEventListener listener;
 
     private GameState state;
 
@@ -33,9 +38,23 @@ public final class Game implements BoardReader {
      *                                  the initial safe area
      */
     public Game(GameConfig config) {
+        this(config, GameEventListener.NONE);
+    }
+
+    /**
+     * Creates a new game with randomly generated bomb placement
+     * that reports its events to a listener.
+     *
+     * @param config game configuration
+     * @param listener receiver of game events
+     * @throws IllegalArgumentException if bombs do not fit outside
+     *                                  the initial safe area
+     */
+    public Game(GameConfig config, GameEventListener listener) {
         this(
                 requireRoomForSafeArea(config),
-                new RandomBombPlacement(new Random())
+                new RandomBombPlacement(new Random()),
+                listener
         );
     }
 
@@ -48,6 +67,26 @@ public final class Game implements BoardReader {
      * @param placement bomb placement strategy
      */
     Game(GameConfig config, BombPlacement placement) {
+        this(config, placement, GameEventListener.NONE);
+    }
+
+    /**
+     * Creates a game with a custom bomb placement strategy
+     * and an event listener.
+     *
+     * <p>This constructor is package-private and intended for tests.
+     *
+     * @param config game configuration
+     * @param placement bomb placement strategy
+     * @param listener receiver of game events
+     */
+    Game(
+            GameConfig config,
+            BombPlacement placement,
+            GameEventListener listener
+    ) {
+        this.listener = Objects.requireNonNull(listener);
+
         geometry = new BoardGeometry(
                 config.getColumns(),
                 config.getRows()
@@ -216,12 +255,18 @@ public final class Game implements BoardReader {
             }
 
             bombMap.start(coord);
+            listener.gameStarted(coord);
         }
 
         openBox(coord);
-
         // Check whether all safe cells have been opened.
         checkWinner();
+
+        // The guard at the top guarantees the game was PLAYING on entry,
+        // so a changed state means this click ended the game.
+        if (state != GameState.PLAYING) {
+            listener.gameFinished(state);
+        }
     }
 
     /**
@@ -238,7 +283,17 @@ public final class Game implements BoardReader {
             return;
         }
 
+        CellState before = boardState.get(coord);
+
         boardState.toggleFlag(coord);
+
+        CellState after = boardState.get(coord);
+
+        // Report only real changes: opened cells and the flag limit
+        // leave the cell as it was.
+        if (before != after) {
+            listener.flagToggled(coord, after == CellState.FLAGGED);
+        }
     }
 
     /**
@@ -255,6 +310,8 @@ public final class Game implements BoardReader {
         state = GameState.TIMEOUT;
 
         revealBoard(null);
+
+        listener.gameFinished(state);
     }
 
     /**

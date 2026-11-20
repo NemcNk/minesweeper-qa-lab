@@ -9,7 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
 
-import stats.InMemoryStatsRepository;
+import stats.JsonStatsRepository;
 
 /**
  * Main application class responsible for initializing and launching Minesweeper.
@@ -36,7 +36,7 @@ public final class MinesweeperApp extends Application {
 
         MinesweeperController controller = new MinesweeperController(
                 stage,
-                new InMemoryStatsRepository()
+                new JsonStatsRepository(JsonStatsRepository.defaultFile())
         );
 
         Scene scene = new Scene(controller.createContent());

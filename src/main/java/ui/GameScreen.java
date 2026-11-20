@@ -13,6 +13,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
+import logging.GameEventLogger;
 
 import model.Coord;
 import model.Difficulty;
@@ -75,8 +76,13 @@ public final class GameScreen extends StackPane {
         this.backAction = Objects.requireNonNull(backAction);
 
         getStyleClass().add("game-root");
+        setId(UiIds.GAME_SCREEN);
+        pauseOverlay.setId(UiIds.PAUSE_OVERLAY);
 
-        game = new Game(difficulty.createConfig());
+        game = new Game(
+                difficulty.createConfig(),
+                new GameEventLogger(difficulty)
+        );
 
         topPanel = new GameTopPanel(this::restart);
 
@@ -112,12 +118,14 @@ public final class GameScreen extends StackPane {
 
         // Pausing is unavailable until the first move is made.
         pauseButton.getStyleClass().add("stats-link-button");
+        pauseButton.setId(UiIds.PAUSE_BUTTON);
         pauseButton.setDisable(true);
         pauseButton.setOnAction(event -> togglePause());
         fixWidth(pauseButton, BUTTON_WIDTH);
 
         Button backButton = new Button("←   Back to menu");
         backButton.getStyleClass().add("stats-link-button");
+        backButton.setId(UiIds.BACK_BUTTON);
         backButton.setOnAction(event -> exitToMenu());
         fixWidth(backButton, BUTTON_WIDTH);
 

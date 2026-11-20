@@ -20,6 +20,14 @@ final class TestBoards {
      * so the test chooses a sensible first click itself.
      */
     static Game game(String... rows) {
+        return game(GameEventListener.NONE, rows);
+    }
+
+    /**
+     * Same as {@link #game(String...)}, but the game reports
+     * its events to the given listener.
+     */
+    static Game game(GameEventListener listener, String... rows) {
 
         int height = rows.length;
         int width = rows[0].length();
@@ -36,7 +44,7 @@ final class TestBoards {
 
         GameConfig config = new GameConfig(width, height, bombs.size());
 
-        return new Game(config, (geometry, count, safe) -> bombs);
+        return new Game(config, (geometry, count, safe) -> bombs, listener);
     }
 
     static Coord at(int x, int y) {

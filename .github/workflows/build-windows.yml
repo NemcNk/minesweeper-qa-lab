@@ -1,0 +1,79 @@
+name: Build of a Portable Minesweeper App for Windows
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+
+    steps:
+      # Download source code
+      - name: Checkout
+        uses: actions/checkout@v7
+
+        env:
+          TZ: Asia/Almaty
+
+    # Install Java 25
+      - name: Setup Java 25
+        uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '25'
+          cache: maven
+
+    # Build and test Maven project
+      - name: Build Maven project
+        run: mvn -B clean package
+
+    # Check Java module configuration
+      - name: Check module descriptor
+        shell: pwsh
+        run: |
+          if (!(Test-Path "target/classes/module-info.class")) {
+            throw "module-info.java is required for this modular build"
+          }
+
+    # Create portable Windows application
+      - name: Create portable application
+        shell: pwsh
+        run: |
+          jpackage `
+            --type app-image `
+            --name Minesweeper `
+            --app-version 1.2.0 `
+            --module-path "target/classes;target/mods" `
+            --module "minesweeper/app.Main" `
+            --dest dist `
+            --java-options "--enable-native-access=javafx.graphics"
+
+    # Verify EXE
+      - name: Verify application
+        shell: pwsh
+        run: |
+          if (!(Test-Path "dist/Minesweeper/Minesweeper.exe")) {
+            throw "Minesweeper.exe was not created"
+          }
+
+    #  Create portable ZIP
+      - name: Package portable ZIP
+        shell: pwsh
+        run: |
+          Compress-Archive `
+            -Path "dist/Minesweeper" `
+            -DestinationPath "Minesweeper-Windows-x64-portable.zip"
+
+    # Upload artifact
+      - name: Upload Windows portable application
+        uses: actions/upload-artifact@v7
+        with:
+          name: Minesweeper-Windows-x64-portable
+          path: Minesweeper-Windows-x64-portable.zip
+          if-no-files-found: error
+          retention-days: 15

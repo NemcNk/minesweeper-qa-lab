@@ -1,9 +1,9 @@
-package ui;
+package session;
 
 /**
  * Test double: time moves only when the test calls {@link #tick()}.
  */
-final class ManualTickerTest implements Ticker {
+final class ManualTicker implements Ticker {
 
     private Runnable onTick;
     private boolean running;

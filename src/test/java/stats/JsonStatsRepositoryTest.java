@@ -1,5 +1,7 @@
 package stats;
 
+import support.RecordingLogger;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.Difficulty;

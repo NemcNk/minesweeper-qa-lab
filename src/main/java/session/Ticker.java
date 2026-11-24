@@ -1,10 +1,13 @@
-package ui;
+package session;
 
 /**
  * Source of one-second ticks. Abstracts the clock so that timer logic
  * can be tested without JavaFX and without real waiting.
+ *
+ * <p>The interface belongs to the session layer (its consumer). The JavaFX
+ * implementation lives in the UI layer, a test double in the tests.
  */
-interface Ticker {
+public interface Ticker {
 
     /** Starts ticking from scratch; a running ticker is restarted. */
     void start(Runnable onTick);
@@ -18,4 +21,3 @@ interface Ticker {
     /** Stops ticking. */
     void stop();
 }
-

@@ -2,8 +2,10 @@
 ![Core Coverage](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/core-coverage.svg)
 ![Mutation](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/mutation.svg)
 
-A Minesweeper game written in Java with JavaFX. The game rules are separated
-from the UI, which makes the core easy to test.
+This project is a Java implementation of the classic Minesweeper game with a JavaFX graphical user interface.
+
+The main architectural principle is the separation of game logic from the UI, which makes the application easier to maintain, extend, and test.
+The project was created as a hands-on environment for practicing unit testing, integration testing, test design, and test automation.
 
 ## Features
 
@@ -12,18 +14,6 @@ from the UI, which makes the core easy to test.
 - Flags with a limit equal to the number of bombs
 - Pause, restart, win and loss screens
 - Session statistics (wins, losses, best time)
-
-## Architecture
-
-```    
-        app
-        ↓
-        ui
-       ↙ ↘
-   core   stats
-       ↘ ↙
-       model
-```
 
 | Package | Responsibility |
 |---|---|

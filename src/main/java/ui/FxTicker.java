@@ -4,10 +4,12 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 
+import session.Ticker;
+
 /**
  * {@link Ticker} backed by a JavaFX {@link Timeline}.
  */
-final class FxTicker implements Ticker {
+public final class FxTicker implements Ticker {
 
     private Timeline timeline;
 

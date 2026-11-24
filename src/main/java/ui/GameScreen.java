@@ -1,7 +1,5 @@
 package ui;
 
-import core.Game;
-
 import javafx.animation.FadeTransition;
 import javafx.animation.PauseTransition;
 import javafx.geometry.Pos;
@@ -13,7 +11,6 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.util.Duration;
-import logging.GameEventLogger;
 
 import model.Coord;
 import model.Difficulty;
@@ -21,12 +18,16 @@ import model.GameState;
 
 import java.util.Objects;
 
-import stats.StatsRepository;
+import session.GameResult;
+import session.GameSession;
+import session.GameSessionListener;
 
 /**
  * Represents the main Minesweeper game screen.
- * Manages the game board, timer, pause functionality,
- * and game result display.
+ *
+ * <p>The screen only draws and forwards input. The rules (timer, pause,
+ * restart, recording the result) live in {@link GameSession}; the screen
+ * redraws itself from the session callbacks.
  */
 public final class GameScreen extends StackPane {
 
@@ -42,65 +43,48 @@ public final class GameScreen extends StackPane {
     private static final String PAUSE_TEXT = "⏸   Pause";
     private static final String RESUME_TEXT = "▶   Resume";
 
-    private final Difficulty difficulty;
-    private final StatsRepository stats;
+    private final GameSession session;
     private final Runnable backAction;
 
-    private final Game game;
     private final BoardView boardView;
     private final GameTopPanel topPanel;
-    private final CountdownTimer timer;
     private final PauseOverlay pauseOverlay = new PauseOverlay();
     private final ResultOverlay resultOverlay;
     private final Button pauseButton = new Button(PAUSE_TEXT);
 
     private PauseTransition resultDelay;
 
-    private boolean paused;
-    private boolean resultRecorded;
-
     /**
      * Creates the game screen and initializes its components.
      *
-     * @param difficulty selected game difficulty
-     * @param stats repository for storing game statistics
+     * @param difficulty selected difficulty, defines the cell size
+     * @param session game rules and state shown by this screen
      * @param backAction action executed when returning to the menu
      */
     public GameScreen(
             Difficulty difficulty,
-            StatsRepository stats,
+            GameSession session,
             Runnable backAction
     ) {
-        this.difficulty = Objects.requireNonNull(difficulty);
-        this.stats = Objects.requireNonNull(stats);
+        Objects.requireNonNull(difficulty);
+
+        this.session = Objects.requireNonNull(session);
         this.backAction = Objects.requireNonNull(backAction);
 
         getStyleClass().add("game-root");
         setId(UiIds.GAME_SCREEN);
         pauseOverlay.setId(UiIds.PAUSE_OVERLAY);
 
-        game = new Game(
-                difficulty.createConfig(),
-                new GameEventLogger(difficulty)
-        );
-
-        topPanel = new GameTopPanel(this::restart);
-
-        timer = new CountdownTimer(
-                difficulty.getTimeMinutes() * 60,
-                new FxTicker(),
-                topPanel::updateTime,
-                this::onTimeExpired
-        );
+        topPanel = new GameTopPanel(session::restart);
 
         boardView = new BoardView(
-                game,
+                session.getBoard(),
                 BoardLayout.cellSize(difficulty),
                 this::handleClick
         );
 
         resultOverlay = new ResultOverlay(
-                this::restart,
+                session::restart,
                 this::exitToMenu
         );
 
@@ -119,8 +103,8 @@ public final class GameScreen extends StackPane {
         // Pausing is unavailable until the first move is made.
         pauseButton.getStyleClass().add("stats-link-button");
         pauseButton.setId(UiIds.PAUSE_BUTTON);
-        pauseButton.setDisable(true);
-        pauseButton.setOnAction(event -> togglePause());
+        pauseButton.setDisable(!session.isPauseAvailable());
+        pauseButton.setOnAction(event -> session.togglePause());
         fixWidth(pauseButton, BUTTON_WIDTH);
 
         Button backButton = new Button("←   Back to menu");
@@ -139,8 +123,10 @@ public final class GameScreen extends StackPane {
 
         setMinHeight(400);
 
-        topPanel.updateMines(game.getRemainingBombs());
-        topPanel.updateTime(timer.getRemainingSeconds());
+        topPanel.updateMines(session.getRemainingBombs());
+        topPanel.updateTime(session.getRemainingSeconds());
+
+        session.setListener(new SessionObserver());
 
         fadeIn();
     }
@@ -148,152 +134,108 @@ public final class GameScreen extends StackPane {
     // Input
 
     /**
-     * Handles mouse clicks on the game board.
-     * Starts the timer on the first move and updates the game interface.
+     * Forwards a mouse click on the board to the session.
+     * During the pause the session ignores clicks as well as the
+     * PauseOverlay, which covers the board.
      *
      * @param coord coordinate of the clicked cell
      * @param event mouse event containing the pressed button
      */
     private void handleClick(Coord coord, MouseEvent event) {
-        // During the pause, clicks are blocked by the PauseOverlay.
-        if (game.getState() != GameState.PLAYING) {
-            return;
-        }
-
         if (event.getButton() == MouseButton.PRIMARY) {
-            boolean wasStarted = game.isStarted();
-
-            game.pressLeftButton(coord);
-
-            if (!wasStarted && game.isStarted()) {
-                timer.start();
-                pauseButton.setDisable(false);
-            }
-
+            session.leftClick(coord);
         } else if (event.getButton() == MouseButton.SECONDARY) {
-            game.pressRightButton(coord);
+            session.rightClick(coord);
+        }
+    }
+
+    // Reactions to the session
+
+    /**
+     * Redraws the screen when the session changes.
+     */
+    private final class SessionObserver implements GameSessionListener {
+
+        @Override
+        public void boardChanged() {
+            boardView.update();
         }
 
-        boardView.update();
-        topPanel.updateMines(game.getRemainingBombs());
-
-        updateGameState();
-    }
-
-    /**
-     * Toggles the game pause state and updates the timer.
-     */
-    private void togglePause() {
-        if (game.getState() != GameState.PLAYING || !game.isStarted()) {
-            return;
+        @Override
+        public void minesChanged(int remaining) {
+            topPanel.updateMines(remaining);
         }
 
-        paused = !paused;
-
-        if (paused) {
-            timer.pause();
-        } else {
-            timer.resume();
+        @Override
+        public void timeChanged(int remainingSeconds) {
+            topPanel.updateTime(remainingSeconds);
         }
 
-        updatePauseUi();
-    }
+        @Override
+        public void pauseChanged(boolean paused) {
+            pauseOverlay.setVisible(paused);
+            pauseButton.setText(paused ? RESUME_TEXT : PAUSE_TEXT);
+        }
 
-    /**
-     * Updates the pause overlay and pause button text.
-     */
-    private void updatePauseUi() {
-        pauseOverlay.setVisible(paused);
-        pauseButton.setText(paused ? RESUME_TEXT : PAUSE_TEXT);
-    }
+        @Override
+        public void pauseAvailabilityChanged(boolean available) {
+            pauseButton.setDisable(!available);
+        }
 
-    // Game state
-
-    /**
-     * Handles the expiration of the game timer.
-     * Changes the game state to timeout and updates the board.
-     */
-    private void onTimeExpired() {
-        game.timeout();
-
-        boardView.update();
-
-        updateGameState();
-    }
-
-    /**
-     * Updates the interface according to the current game state.
-     */
-    private void updateGameState() {
-        GameState state = game.getState();
-
-        switch (state) {
-            case LOST_BOMB -> finish(false, "You hit a mine!");
-            case TIMEOUT -> finish(false, "Time's up!");
-            case WON -> finish(true, "Congratulations!");
-            case PLAYING -> {
-                // The game continues.
-            }
-            default -> throw new IllegalStateException(
-                    "Unexpected game state: " + state
+        @Override
+        public void finished(GameResult result) {
+            topPanel.setFace(
+                    result.isWon()
+                            ? FaceButton.Face.WON
+                            : FaceButton.Face.LOST
             );
-        }
-    }
 
-    /**
-     * Finishes the game, stops the timer and displays the result.
-     *
-     * @param won true if the player won, otherwise false
-     * @param subtitle message displayed with the game result
-     */
-    private void finish(boolean won, String subtitle) {
-        timer.stop();
-        pauseButton.setDisable(true);
-
-        topPanel.setFace(
-                won ? FaceButton.Face.WON : FaceButton.Face.LOST
-        );
-
-        recordResult(won);
-        showResult(won, subtitle);
-    }
-
-    /**
-     * Records the game result in the statistics repository.
-     * Prevents the same result from being recorded more than once.
-     *
-     * @param won true if the player won, otherwise false
-     */
-    private void recordResult(boolean won) {
-        if (resultRecorded) {
-            return;
+            showResult(result);
         }
 
-        resultRecorded = true;
+        @Override
+        public void restarted() {
+            stopResultDelay();
+            resultOverlay.hide();
 
-        if (won) {
-            stats.recordWin(difficulty, timer.getElapsedSeconds());
-        } else {
-            stats.recordLoss(difficulty);
+            topPanel.setFace(FaceButton.Face.PLAYING);
         }
     }
 
     /**
      * Schedules the display of the game result after a short delay.
      *
-     * @param won true if the player won, otherwise false
-     * @param subtitle message displayed with the game result
+     * @param result how the game ended
      */
-    private void showResult(boolean won, String subtitle) {
-        int elapsed = timer.getElapsedSeconds();
+    private void showResult(GameResult result) {
+        String subtitle = subtitleFor(result.state());
 
         stopResultDelay();
 
         resultDelay = new PauseTransition(RESULT_DELAY);
-        resultDelay.setOnFinished(
-                event -> resultOverlay.show(won, subtitle, elapsed)
-        );
+        resultDelay.setOnFinished(event -> resultOverlay.show(
+                result.isWon(),
+                subtitle,
+                result.elapsedSeconds()
+        ));
         resultDelay.play();
+    }
+
+    /**
+     * Returns the message shown under the result title.
+     *
+     * @param state final state of the game
+     * @return message for the player
+     */
+    private static String subtitleFor(GameState state) {
+        return switch (state) {
+            case LOST_BOMB -> "You hit a mine!";
+            case TIMEOUT -> "Time's up!";
+            case WON -> "Congratulations!";
+            case PLAYING -> throw new IllegalStateException(
+                    "Unexpected game state: " + state
+            );
+        };
     }
 
     /**
@@ -309,33 +251,11 @@ public final class GameScreen extends StackPane {
     // Screen controls
 
     /**
-     * Restarts the current game and resets its interface.
-     */
-    private void restart() {
-        stopResultDelay();
-        resultOverlay.hide();
-
-        timer.reset();
-
-        paused = false;
-        updatePauseUi();
-        pauseButton.setDisable(true);
-
-        resultRecorded = false;
-
-        game.start();
-        boardView.update();
-
-        topPanel.setFace(FaceButton.Face.PLAYING);
-        topPanel.updateMines(game.getRemainingBombs());
-    }
-
-    /**
      * Stops active transitions and returns to the main menu.
      */
     private void exitToMenu() {
         stopResultDelay();
-        timer.stop();
+        session.dispose();
 
         backAction.run();
     }
@@ -395,7 +315,3 @@ public final class GameScreen extends StackPane {
                 + 20;
     }
 }
-
-
-
-

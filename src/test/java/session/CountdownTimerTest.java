@@ -1,4 +1,4 @@
-package ui;
+package session;
 
 import org.junit.jupiter.api.Test;
 
@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CountdownTimerTest {
 
-    private final ManualTickerTest ticker = new ManualTickerTest();
+    private final ManualTicker ticker = new ManualTicker();
     private final List<Integer> ticks = new ArrayList<>();
     private int expiredCount;
 

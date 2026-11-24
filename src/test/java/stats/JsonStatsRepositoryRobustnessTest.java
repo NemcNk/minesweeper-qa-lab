@@ -1,5 +1,7 @@
 package stats;
 
+import support.RecordingLogger;
+
 import model.Difficulty;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;

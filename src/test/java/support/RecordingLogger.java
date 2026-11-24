@@ -1,15 +1,17 @@
-package stats;
+package support;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
 /**
- * Test logger: keeps "LEVEL message" lines instead of printing them.
+ * Test logger shared by all tests: keeps "LEVEL message" lines instead of
+ * printing them.
  */
-final class RecordingLogger implements System.Logger {
+public final class RecordingLogger implements System.Logger {
 
-    final List<String> lines = new ArrayList<>();
+    /** Recorded lines in the order they were logged. */
+    public final List<String> lines = new ArrayList<>();
 
     @Override
     public String getName() {

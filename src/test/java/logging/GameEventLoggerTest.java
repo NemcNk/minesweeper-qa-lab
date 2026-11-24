@@ -4,10 +4,7 @@ import model.Coord;
 import model.Difficulty;
 import model.GameState;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.ResourceBundle;
+import support.RecordingLogger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,33 +44,5 @@ class GameEventLoggerTest {
         assertThat(recorder.lines).containsExactly(
                 "INFO Game finished: difficulty=EASY, result=LOST_BOMB"
         );
-    }
-
-    // Records "LEVEL message" lines instead of printing them.
-    private static final class RecordingLogger implements System.Logger {
-
-        private final List<String> lines = new ArrayList<>();
-
-        @Override
-        public String getName() {
-            return "test";
-        }
-
-        @Override
-        public boolean isLoggable(Level level) {
-            return true;
-        }
-
-        @Override
-        public void log(Level level, ResourceBundle bundle,
-                        String msg, Throwable thrown) {
-            lines.add(level + " " + msg);
-        }
-
-        @Override
-        public void log(Level level, ResourceBundle bundle,
-                        String format, Object... params) {
-            lines.add(level + " " + format);
-        }
     }
 }

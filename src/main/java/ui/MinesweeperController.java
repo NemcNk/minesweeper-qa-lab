@@ -7,6 +7,8 @@ import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 import model.Difficulty;
+import session.GameSession;
+import session.RandomGameFactory;
 import stats.StatsRepository;
 
 /**
@@ -66,9 +68,18 @@ public final class MinesweeperController {
      * @param difficulty the selected game difficulty
      */
     private void startGame(Difficulty difficulty) {
+        // The controller wires the session: random bombs, the real
+        // statistics repository and a JavaFX clock.
+        GameSession session = new GameSession(
+                difficulty,
+                new RandomGameFactory(),
+                stats,
+                new FxTicker()
+        );
+
         GameScreen gameScreen = new GameScreen(
                 difficulty,
-                stats,
+                session,
                 this::showMenu
         );
 
@@ -111,11 +122,3 @@ public final class MinesweeperController {
         stage.centerOnScreen();
     }
 }
-
-
-
-
-
-
-
-

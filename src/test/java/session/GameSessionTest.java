@@ -436,6 +436,12 @@ class GameSessionTest {
         public DifficultyStats get(Difficulty difficulty) {
             return DifficultyStats.EMPTY;
         }
+
+        @Override
+        public void reset() {
+            wins.clear();
+            losses = 0;
+        }
     }
 
     private static final class RecordingListener

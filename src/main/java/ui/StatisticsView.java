@@ -1,12 +1,18 @@
 package ui;
 
+import java.util.Objects;
 import java.util.OptionalInt;
+import java.util.function.BooleanSupplier;
 
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 
 import model.Difficulty;
@@ -15,11 +21,16 @@ import stats.StatsRepository;
 
 /**
  * View displaying statistics for each difficulty level.
+ * The player can delete all statistics after a confirmation.
  */
 public final class StatisticsView extends VBox {
 
     private static final String TEXT_COLOR = "#7a7a7a";
     private static final String TITLE_COLOR = "#212b3f";
+
+    private final StatsRepository stats;
+    private final BooleanSupplier confirmReset;
+    private final VBox card = new VBox();
 
     /**
      * Creates the statistics view.
@@ -28,6 +39,25 @@ public final class StatisticsView extends VBox {
      * @param backAction action to execute when returning to the menu
      */
     public StatisticsView(StatsRepository stats, Runnable backAction) {
+        this(stats, backAction, StatisticsView::askToConfirmReset);
+    }
+
+    /**
+     * Creates the statistics view with a custom confirmation. Lets a test
+     * or a future UI test skip the modal dialog.
+     *
+     * @param stats repository containing game statistics
+     * @param backAction action to execute when returning to the menu
+     * @param confirmReset returns true if the player confirms the reset
+     */
+    StatisticsView(
+            StatsRepository stats,
+            Runnable backAction,
+            BooleanSupplier confirmReset
+    ) {
+        this.stats = Objects.requireNonNull(stats);
+        this.confirmReset = Objects.requireNonNull(confirmReset);
+
         setAlignment(Pos.CENTER);
         setSpacing(20);
 
@@ -41,6 +71,49 @@ public final class StatisticsView extends VBox {
                         + "-fx-font-weight: bold;"
         );
 
+        card.setAlignment(Pos.CENTER);
+        card.setPadding(new Insets(24, 32, 24, 32));
+        card.setMaxWidth(USE_PREF_SIZE);
+        card.setStyle(
+                "-fx-background-color: white;"
+                        + "-fx-background-radius: 16;"
+        );
+
+        refreshTable();
+
+        Button backButton = new Button("←   Back to menu");
+        backButton.getStyleClass().add("back-button");
+        backButton.setId(UiIds.STATISTICS_BACK_BUTTON);
+        backButton.setOnAction(event -> backAction.run());
+
+        Button resetButton = new Button("Reset statistics");
+        resetButton.getStyleClass().add("stats-link-button");
+        resetButton.setId(UiIds.STATISTICS_RESET_BUTTON);
+        resetButton.setOnAction(event -> resetStatistics());
+
+        HBox buttons = new HBox(12, backButton, resetButton);
+        buttons.setAlignment(Pos.CENTER);
+
+        getChildren().addAll(title, card, buttons);
+    }
+
+    /**
+     * Deletes all statistics if the player confirms, then redraws
+     * the table.
+     */
+    private void resetStatistics() {
+        if (!confirmReset.getAsBoolean()) {
+            return;
+        }
+
+        stats.reset();
+        refreshTable();
+    }
+
+    /**
+     * Rebuilds the table from the repository.
+     */
+    private void refreshTable() {
         GridPane table = new GridPane();
         table.setHgap(30);
         table.setVgap(12);
@@ -73,21 +146,43 @@ public final class StatisticsView extends VBox {
             row++;
         }
 
-        VBox card = new VBox(table);
-        card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(24, 32, 24, 32));
-        card.setMaxWidth(USE_PREF_SIZE);
-        card.setStyle(
-                "-fx-background-color: white;"
-                        + "-fx-background-radius: 16;"
+        card.getChildren().setAll(table);
+    }
+
+    /**
+     * Asks the player to confirm the deletion. "Cancel" is the default
+     * button, so a stray Enter key does not delete anything.
+     *
+     * @return true if the player chose "Reset"
+     */
+    private static boolean askToConfirmReset() {
+        ButtonType reset = new ButtonType(
+                "Reset",
+                ButtonBar.ButtonData.OK_DONE
+        );
+        ButtonType cancel = new ButtonType(
+                "Cancel",
+                ButtonBar.ButtonData.CANCEL_CLOSE
         );
 
-        Button backButton = new Button("←   Back to menu");
-        backButton.getStyleClass().add("back-button");
-        backButton.setId(UiIds.STATISTICS_BACK_BUTTON);
-        backButton.setOnAction(event -> backAction.run());
+        Alert alert = new Alert(
+                Alert.AlertType.CONFIRMATION,
+                "All wins, losses and best times will be deleted. "
+                        + "This cannot be undone.",
+                reset,
+                cancel
+        );
+        alert.setTitle("Reset statistics");
+        alert.setHeaderText("Reset all statistics?");
 
-        getChildren().addAll(title, card, backButton);
+        ((Button) alert.getDialogPane().lookupButton(reset))
+                .setDefaultButton(false);
+        ((Button) alert.getDialogPane().lookupButton(cancel))
+                .setDefaultButton(true);
+
+        return alert.showAndWait()
+                .filter(button -> button == reset)
+                .isPresent();
     }
 
     /**

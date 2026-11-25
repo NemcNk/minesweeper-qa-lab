@@ -32,4 +32,9 @@ public final class InMemoryStatsRepository implements StatsRepository {
 
         return stats.getOrDefault(difficulty, DifficultyStats.EMPTY);
     }
+
+    @Override
+    public void reset() {
+        stats.clear();
+    }
 }

@@ -20,5 +20,11 @@ public interface StatsRepository {
     void recordLoss(Difficulty difficulty);
 
     DifficultyStats get(Difficulty difficulty);
+
+    /**
+     * Deletes the statistics of every difficulty: wins, losses and best
+     * times all become empty. The change cannot be undone.
+     */
+    void reset();
 }
 

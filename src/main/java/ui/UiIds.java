@@ -42,6 +42,7 @@ public final class UiIds {
     // Statistics screen
     public static final String STATISTICS_VIEW = "statistics-view";
     public static final String STATISTICS_BACK_BUTTON = "statistics-back-button";
+    public static final String STATISTICS_RESET_BUTTON = "statistics-reset-button";
 
     private UiIds() {
     }
@@ -83,3 +84,4 @@ public final class UiIds {
         return difficulty.name().toLowerCase(Locale.ROOT);
     }
 }
+

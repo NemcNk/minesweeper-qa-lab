@@ -107,6 +107,20 @@ public final class JsonStatsRepository implements StatsRepository {
         return stats.getOrDefault(difficulty, DifficultyStats.EMPTY);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The file is rewritten with empty statistics through the same
+     * atomic write as every other save, so a crash cannot leave a
+     * half-written file. A backup of a damaged file ({@code .corrupt})
+     * is not touched.
+     */
+    @Override
+    public void reset() {
+        stats.clear();
+        save();
+    }
+
     // Loading
 
     private void load() {

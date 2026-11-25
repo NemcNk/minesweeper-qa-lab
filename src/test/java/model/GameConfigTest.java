@@ -53,6 +53,16 @@ class GameConfigTest {
                 .doesNotThrowAnyException();
     }
 
+    @Test
+    void handlesCellCountOverflowWithoutIntegerOverflow() {
+
+        // 50_000 * 50_000 = 2_500_000_000,
+        // which exceeds Integer.MAX_VALUE.
+        assertThatCode(() ->
+                new GameConfig(50_000, 50_000, Integer.MAX_VALUE)
+        ).doesNotThrowAnyException();
+    }
+
     @ParameterizedTest
     @EnumSource(Difficulty.class)
     void everyDifficultyProducesValidConfig(Difficulty difficulty) {

@@ -1,8 +1,6 @@
 name: Build of a Portable Minesweeper App for Windows
 
 on:
-  push:
-    branches: [main]
   workflow_dispatch:
 
 permissions:

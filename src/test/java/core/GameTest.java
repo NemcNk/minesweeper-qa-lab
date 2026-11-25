@@ -325,6 +325,60 @@ class GameTest {
         assertThat(game.getState()).isEqualTo(GameState.LOST_BOMB);
     }
 
+    @Test
+    void chordWithTooManyFlagsDoesNothing() {
+
+        Game game = TestBoards.game(
+                "*...",
+                "...*",
+                "...."
+        );
+
+        game.pressLeftButton(at(1, 0));
+
+        game.pressRightButton(at(0, 1));
+        game.pressRightButton(at(2, 1));
+
+        assertThat(stateOf(game, 0, 1))
+                .isEqualTo(CellState.FLAGGED);
+
+        assertThat(stateOf(game, 2, 1))
+                .isEqualTo(CellState.FLAGGED);
+
+        game.pressLeftButton(at(1, 0));
+
+        assertThat(stateOf(game, 0, 0))
+                .isEqualTo(CellState.CLOSED);
+
+        assertThat(game.getState())
+                .isEqualTo(GameState.PLAYING);
+    }
+
+    @Test
+    void chordOpensEmptyAreaWithFloodFill() {
+
+        Game game = TestBoards.game(
+                "*...",
+                "....",
+                "...."
+        );
+
+        // Open numbered cell (1, 0).
+        game.pressLeftButton(at(1, 0));
+
+        // Correctly flag the bomb.
+        game.pressRightButton(at(0, 0));
+
+        // Chord opens neighbouring cells and triggers flood-fill.
+        game.pressLeftButton(at(1, 0));
+
+        assertThat(stateOf(game, 2, 0)).isEqualTo(CellState.OPENED);
+        assertThat(stateOf(game, 3, 0)).isEqualTo(CellState.OPENED);
+        assertThat(stateOf(game, 3, 2)).isEqualTo(CellState.OPENED);
+
+        assertThat(game.getState()).isEqualTo(GameState.WON);
+    }
+
     // invalid input
 
     @Test
@@ -370,6 +424,21 @@ class GameTest {
         assertThat(game.isStarted()).isFalse();
         assertThat(stateOf(game, 0, 0)).isEqualTo(CellState.CLOSED);
         assertThat(game.getRemainingBombs()).isEqualTo(1);
+    }
+
+    @Test
+    void winsWithoutPlacingAnyFlags() {
+
+        Game game = board3x3();
+
+        game.pressLeftButton(at(2, 2));
+
+        assertThat(game.getState()).isEqualTo(GameState.WON);
+        assertThat(game.getRemainingBombs()).isEqualTo(1);
+
+        assertThat(stateOf(game, 0, 0)).isEqualTo(CellState.CLOSED);
+
+        assertThat(game.getRemainingBombs()).isPositive();
     }
 
     // random layout (properties)

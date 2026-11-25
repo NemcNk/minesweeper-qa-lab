@@ -58,6 +58,32 @@ class BombMapTest {
     }
 
     @Test
+    void sumOfNumbersEqualsNumberOfBombNeighbourPairs() {
+
+        Set<Coord> bombs = Set.of(
+                at(0, 0),
+                at(2, 0),
+                at(1, 2)
+        );
+
+        BombMap map = map(bombs.size(), bombs);
+
+        map.start(at(0, 2));
+
+        int sumOfNumbers = geometry.getAllCoords().stream()
+                .map(map::get)
+                .filter(CellContent::isNumber)
+                .mapToInt(CellContent::getNumber)
+                .sum();
+
+        int bombNeighbourPairs = bombs.stream()
+                .mapToInt(bomb -> geometry.getCoordsAround(bomb).size())
+                .sum();
+
+        assertThat(sumOfNumbers).isEqualTo(bombNeighbourPairs);
+    }
+
+    @Test
     void wrongNumberOfBombsFromPlacementIsRejected() {
 
         BombMap map = map(2, Set.of(at(1, 1)));

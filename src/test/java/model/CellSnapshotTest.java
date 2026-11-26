@@ -1,7 +1,10 @@
 package model;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class CellSnapshotTest {
@@ -134,5 +137,44 @@ class CellSnapshotTest {
         int secondHash = snapshot.hashCode();
 
         assertEquals(firstHash, secondHash);
+    }
+
+    @ParameterizedTest
+    @EnumSource(CellState.class)
+    void shouldCreateSnapshotWithEveryCellState(CellState state) {
+
+        CellSnapshot snapshot = new CellSnapshot(
+                CellContent.ZERO,
+                state
+        );
+
+        assertThat(snapshot.getState()).isEqualTo(state);
+    }
+
+    @ParameterizedTest
+    @EnumSource(CellContent.class)
+    void shouldCreateSnapshotWithEveryCellContent(CellContent content) {
+
+        CellSnapshot snapshot = new CellSnapshot(
+                content,
+                CellState.CLOSED
+        );
+
+        assertThat(snapshot.getContent()).isEqualTo(content);
+    }
+
+    @Test
+    void shouldSupportEveryContentAndStateCombination() {
+
+        for (CellContent content : CellContent.values()) {
+            for (CellState state : CellState.values()) {
+
+                CellSnapshot snapshot =
+                        new CellSnapshot(content, state);
+
+                assertThat(snapshot.getContent()).isEqualTo(content);
+                assertThat(snapshot.getState()).isEqualTo(state);
+            }
+        }
     }
 }

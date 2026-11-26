@@ -16,6 +16,9 @@ out/
 # Log
 *.log
 
+# jqwik
+.jqwik-database
+
 # Test and coverage reports
 allure-results/
 allure-report/

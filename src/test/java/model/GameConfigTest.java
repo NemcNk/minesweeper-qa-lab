@@ -73,4 +73,61 @@ class GameConfigTest {
         assertThat(config.getRows()).isEqualTo(difficulty.getSize());
         assertThat(config.getTotalBombs()).isEqualTo(difficulty.getMines());
     }
+
+    @Test
+    void rejectsZeroColumns() {
+        assertThatThrownBy(() -> new GameConfig(0, 5, 0))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void rejectsZeroRows() {
+        assertThatThrownBy(() -> new GameConfig(5, 0, 0))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void rejectsExactlyCellCountBombs() {
+        assertThatThrownBy(() -> new GameConfig(3, 3, 9))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void allowsOneLessBombThanCellCount() {
+        assertThatCode(() -> new GameConfig(3, 3, 8))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void rejectsNegativeBombs() {
+        assertThatThrownBy(() -> new GameConfig(3, 3, -1))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void rejectsZeroColumnsWithPositiveRows() {
+        assertThatThrownBy(() -> new GameConfig(0, 5, 1))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void rejectsZeroRowsWithPositiveColumns() {
+        assertThatThrownBy(() -> new GameConfig(5, 0, 1))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+            "0, 1",
+            "1, 0",
+            "0, 5",
+            "5, 0"
+    })
+    void rejectsZeroDimensions(int columns, int rows) {
+
+        assertThatThrownBy(() ->
+                new GameConfig(columns, rows, 0)
+        ).isInstanceOf(IllegalArgumentException.class);
+    }
+
 }

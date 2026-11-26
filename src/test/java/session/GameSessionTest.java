@@ -135,6 +135,52 @@ class GameSessionTest {
         assertThat(listener.events).contains("time:99", "time:95");
     }
 
+    @Test
+    void subsequentLeftClickDoesNotRestartTimer() {
+
+        GameSession session = session2x2();
+
+        session.leftClick(at(1, 1));
+        ticker.tick(3);
+
+        session.leftClick(at(1, 0));
+
+        assertThat(session.getRemainingSeconds()).isEqualTo(LIMIT - 3);
+        assertThat(session.isPauseAvailable()).isTrue();
+        assertThat(listener.events)
+                .containsOnlyOnce("pauseAvailable:true");
+    }
+
+    @Test
+    void clickingFlaggedCellDoesNotStartTimer() {
+
+        GameSession session = session2x2();
+
+        session.rightClick(at(1, 0));
+        session.leftClick(at(1, 0));
+
+        assertThat(stateOf(session, 1, 0)).isEqualTo(CellState.FLAGGED);
+        assertThat(ticker.isRunning()).isFalse();
+        assertThat(session.isPauseAvailable()).isFalse();
+        assertThat(session.getRemainingSeconds()).isEqualTo(LIMIT);
+    }
+
+    @Test
+    void leftClickAfterRemovingFlagStartsTimer() {
+
+        GameSession session = session2x2();
+
+        session.rightClick(at(1, 0));
+        session.rightClick(at(1, 0));
+        session.leftClick(at(1, 0));
+
+        assertThat(stateOf(session, 1, 0)).isEqualTo(CellState.OPENED);
+        assertThat(ticker.isRunning()).isTrue();
+        assertThat(session.isPauseAvailable()).isTrue();
+        assertThat(listener.events)
+                .containsOnlyOnce("pauseAvailable:true");
+    }
+
     // pause
 
     @Test

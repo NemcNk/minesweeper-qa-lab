@@ -19,10 +19,13 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <javafx.version>25</javafx.version>
-        <jackson.version>2.20.1</jackson.version>
+        <jackson.version>2.21.8</jackson.version>
 
         <pitest.version>1.30.0</pitest.version>
         <pitest-junit5.version>1.2.3</pitest-junit5.version>
+
+        <mockito.version>5.23.0</mockito.version>
+
     </properties>
 
     <dependencies>
@@ -54,6 +57,14 @@
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>3.27.7</version>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Mockito -->
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <version>5.23.0</version>
             <scope>test</scope>
         </dependency>
 
@@ -94,6 +105,7 @@
                         <phase>package</phase>
                         <goals>
                             <goal>copy-dependencies</goal>
+                            <goal>properties</goal>
                         </goals>
                         <configuration>
                             <outputDirectory>
@@ -115,6 +127,7 @@
                     <consoleOutput>true</consoleOutput>
                     <failOnViolation>false</failOnViolation>
                     <configLocation>checkstyle.xml</configLocation>
+                    <outputFileFormat>xml</outputFileFormat>
                 </configuration>
 
                 <dependencies>
@@ -137,6 +150,9 @@
                     <threshold>Low</threshold>
                     <failOnError>false</failOnError>
                     <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+
+                    <!-- HTML report -->
+                    <htmlOutput>true</htmlOutput>
                 </configuration>
             </plugin>
 
@@ -230,8 +246,69 @@
                 </executions>
             </plugin>
 
+            <!-- Maven Site -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.21.0</version>
+            </plugin>
+
         </plugins>
     </build>
+
+    <!-- Maven Site Reports -->
+    <reporting>
+        <plugins>
+
+            <!-- Maven Project Info Reports -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-project-info-reports-plugin</artifactId>
+                <version>3.9.0</version>
+            </plugin>
+
+            <!-- Checkstyle HTML Report -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>3.6.0</version>
+                <configuration>
+                    <configLocation>checkstyle.xml</configLocation>
+                </configuration>
+            </plugin>
+
+            <!-- SpotBugs HTML Report -->
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>4.10.5.0</version>
+                <configuration>
+                    <effort>Max</effort>
+                    <threshold>Low</threshold>
+                    <htmlOutput>true</htmlOutput>
+                    <excludeFilterFile>spotbugs-exclude.xml</excludeFilterFile>
+                </configuration>
+            </plugin>
+
+            <!-- PMD HTML Report -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>3.28.0</version>
+                <configuration>
+                    <printFailingErrors>true</printFailingErrors>
+                </configuration>
+            </plugin>
+
+            <!-- JaCoCo HTML Report -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.15</version>
+            </plugin>
+
+        </plugins>
+    </reporting>
 
     <profiles>
 
@@ -258,11 +335,15 @@
                             <targetClasses>
                                 <param>core.*</param>
                                 <param>stats.*</param>
+                                <param>model.*</param>
+                                <param>session.*</param>
                             </targetClasses>
 
                             <targetTests>
                                 <param>core.*</param>
                                 <param>stats.*</param>
+                                <param>model.*</param>
+                                <param>session.*</param>
                             </targetTests>
 
                             <outputFormats>

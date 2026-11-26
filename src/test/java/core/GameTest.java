@@ -482,4 +482,114 @@ class GameTest {
             assertThat(bombs).isEqualTo(difficulty.getMines());
         }
     }
+    // All game states
+
+    @Test
+    void containsAllFourGameStates() {
+        assertThat(GameState.values())
+                .containsExactly(
+                        GameState.PLAYING,
+                        GameState.LOST_BOMB,
+                        GameState.TIMEOUT,
+                        GameState.WON
+                );
+    }
+
+    @Test
+    void rightClickDoesNotStartGame() {
+        Game game = board3x3();
+
+        game.pressRightButton(at(1, 1));
+
+        assertThat(game.getState()).isEqualTo(GameState.PLAYING);
+        assertThat(game.isStarted()).isFalse();
+    }
+
+    @Test
+    void placingFlagsKeepsGameInPlayingState() {
+        Game game = board3x3();
+
+        game.pressRightButton(at(1, 1));
+
+        assertThat(game.getState()).isEqualTo(GameState.PLAYING);
+        assertThat(game.getRemainingBombs()).isZero();
+    }
+
+    @Test
+    void timeoutAfterWinningDoesNotChangeState() {
+        Game game = board3x3();
+
+        game.pressLeftButton(at(2, 2));
+
+        assertThat(game.getState()).isEqualTo(GameState.WON);
+
+        game.timeout();
+
+        assertThat(game.getState()).isEqualTo(GameState.WON);
+    }
+
+    @Test
+    void timeoutAfterLosingDoesNotChangeState() {
+        Game game = board2x2();
+
+        game.pressLeftButton(at(1, 1));
+        game.pressLeftButton(at(0, 0));
+
+        assertThat(game.getState()).isEqualTo(GameState.LOST_BOMB);
+
+        game.timeout();
+
+        assertThat(game.getState()).isEqualTo(GameState.LOST_BOMB);
+    }
+
+    @Test
+    void restartAfterTimeoutReturnsToPlaying() {
+        Game game = board2x2();
+
+        game.pressLeftButton(at(1, 1));
+        game.timeout();
+
+        assertThat(game.getState()).isEqualTo(GameState.TIMEOUT);
+
+        game.start();
+
+        assertThat(game.getState()).isEqualTo(GameState.PLAYING);
+        assertThat(game.isStarted()).isFalse();
+        assertThat(game.getRemainingBombs()).isEqualTo(1);
+    }
+
+    @Test
+    void restartAfterWinningReturnsToPlaying() {
+        Game game = board3x3();
+
+        game.pressLeftButton(at(2, 2));
+
+        assertThat(game.getState()).isEqualTo(GameState.WON);
+
+        game.start();
+
+        assertThat(game.getState()).isEqualTo(GameState.PLAYING);
+        assertThat(game.isStarted()).isFalse();
+        assertThat(game.getRemainingBombs()).isEqualTo(1);
+    }
+
+    @Test
+    void timeoutRevealsAllBombs() {
+        Game game = TestBoards.game(
+                "*...",
+                "....",
+                "...*"
+        );
+
+        game.pressLeftButton(at(1, 0));
+        game.timeout();
+
+        assertThat(game.getState()).isEqualTo(GameState.TIMEOUT);
+
+        assertThat(stateOf(game, 0, 0))
+                .isEqualTo(CellState.OPENED);
+
+        assertThat(stateOf(game, 3, 2))
+                .isEqualTo(CellState.OPENED);
+    }
 }

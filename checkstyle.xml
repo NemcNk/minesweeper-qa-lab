@@ -24,5 +24,8 @@
         <module name="NeedBraces"/>
         <module name="EmptyBlock"/>
         <module name="ModifierOrder"/>
+        <module name="JavadocType"/>
+        <module name="JavadocMethod"/>
+        <module name="JavadocVariable"/>
     </module>
 </module>

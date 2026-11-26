@@ -214,4 +214,139 @@ class JsonStatsRepositoryTest {
         assertThat(new JsonStatsRepository(file())
                 .get(Difficulty.EASY).losses()).isEqualTo(1);
     }
+
+    @Test
+    void missingBestTimeMeansNoBestTime() throws IOException {
+
+        Files.writeString(file(), """
+            {
+              "version": 1,
+              "stats": {
+                "EASY": {
+                  "wins": 3,
+                  "losses": 1
+                }
+              }
+            }
+            """);
+
+        JsonStatsRepository repository = open();
+
+        assertThat(repository.get(Difficulty.EASY))
+                .isEqualTo(new DifficultyStats(
+                        3, 1, OptionalInt.empty()
+                ));
+
+        assertThat(backup()).doesNotExist();
+    }
+
+    @Test
+    void missingWinsIsTreatedAsDamagedFile() throws IOException {
+
+        Files.writeString(file(), """
+            {
+              "version": 1,
+              "stats": {
+                "EASY": {
+                  "losses": 1,
+                  "bestTimeSeconds": null
+                }
+              }
+            }
+            """);
+
+        assertThat(open().get(Difficulty.EASY))
+                .isEqualTo(DifficultyStats.EMPTY);
+
+        assertThat(backup()).exists();
+    }
+
+    @Test
+    void missingLossesIsTreatedAsDamagedFile() throws IOException {
+
+        Files.writeString(file(), """
+            {
+              "version": 1,
+              "stats": {
+                "EASY": {
+                  "wins": 3,
+                  "bestTimeSeconds": 30
+                }
+              }
+            }
+            """);
+
+        assertThat(open().get(Difficulty.EASY))
+                .isEqualTo(DifficultyStats.EMPTY);
+
+        assertThat(backup()).exists();
+    }
+
+    @Test
+    void wrongBestTimeTypeIsTreatedAsDamagedFile() throws IOException {
+
+        Files.writeString(file(), """
+            {
+              "version": 1,
+              "stats": {
+                "EASY": {
+                  "wins": 3,
+                  "losses": 1,
+                  "bestTimeSeconds": "fast"
+                }
+              }
+            }
+            """);
+
+        assertThat(open().get(Difficulty.EASY))
+                .isEqualTo(DifficultyStats.EMPTY);
+
+        assertThat(backup()).exists();
+    }
+
+    @Test
+    void negativeBestTimeIsTreatedAsDamagedFile() throws IOException {
+
+        Files.writeString(file(), """
+            {
+              "version": 1,
+              "stats": {
+                "EASY": {
+                  "wins": 3,
+                  "losses": 1,
+                  "bestTimeSeconds": -10
+                }
+              }
+            }
+            """);
+
+        assertThat(open().get(Difficulty.EASY))
+                .isEqualTo(DifficultyStats.EMPTY);
+
+        assertThat(backup()).exists();
+    }
+
+    @Test
+    void nullBestTimeMeansNoBestTime() throws IOException {
+
+        Files.writeString(file(), """
+            {
+              "version": 1,
+              "stats": {
+                "EASY": {
+                  "wins": 2,
+                  "losses": 4,
+                  "bestTimeSeconds": null
+                }
+              }
+            }
+            """);
+
+        assertThat(open().get(Difficulty.EASY))
+                .isEqualTo(new DifficultyStats(
+                        2, 4, OptionalInt.empty()
+                ));
+
+        assertThat(backup()).doesNotExist();
+    }
 }

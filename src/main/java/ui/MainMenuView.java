@@ -14,17 +14,16 @@ import javafx.scene.shape.Rectangle;
 
 import model.Difficulty;
 
-/**
- * Main menu view for the Minesweeper application.
- */
+/** Main menu view for the Minesweeper application.*/
 public final class MainMenuView extends VBox {
 
+    /** Defines the fixed height of action buttons in the main menu. */
     private static final double ACTION_BUTTON_HEIGHT = 46;
 
+    /** Stores the currently selected game difficulty. */
     private Difficulty selectedDifficulty = null;
 
-    /**
-     * Creates the main menu with difficulty selection and action buttons.
+    /** Creates the main menu with difficulty selection and action buttons.
      *
      * @param onPlay callback executed when a game starts
      * @param onViewStatistics callback executed when statistics are requested
@@ -33,6 +32,7 @@ public final class MainMenuView extends VBox {
             Consumer<Difficulty> onPlay,
             Runnable onViewStatistics
     ) {
+        // Configure the main menu layout and dimensions.
         setAlignment(Pos.CENTER);
         setSpacing(18);
 
@@ -42,6 +42,7 @@ public final class MainMenuView extends VBox {
 
         getStyleClass().add("menu-root");
 
+        // Load the application icon from the resources directory.
         var iconStream = getClass().getResourceAsStream(
                 "/images/iconModern.png"
         );
@@ -54,9 +55,11 @@ public final class MainMenuView extends VBox {
 
         Image image = new Image(iconStream);
 
+        // Create the animated bomb icon displayed above the menu title.
         BombIconAnimation iconContainer = new BombIconAnimation(image);
         iconContainer.getStyleClass().add("menu-icon");
 
+        // Create and configure the application title.
         Label title = new Label("Minesweeper");
 
         title.getStyleClass().add("menu-title");
@@ -66,8 +69,10 @@ public final class MainMenuView extends VBox {
         title.setAlignment(Pos.CENTER);
         title.setTextOverrun(OverrunStyle.CLIP);
 
+        // Create a container for the available difficulty options.
         VBox difficultyButtons = new VBox(12);
 
+        // Generate one selection button for each available difficulty.
         for (Difficulty difficulty : Difficulty.values()) {
             final Difficulty currentDifficulty = difficulty;
 
@@ -81,6 +86,7 @@ public final class MainMenuView extends VBox {
                             + " min"
             );
 
+            // Align the difficulty name and its configuration details.
             name.setPrefWidth(100);
             name.setMinWidth(100);
             name.setAlignment(Pos.CENTER_LEFT);
@@ -95,12 +101,14 @@ public final class MainMenuView extends VBox {
 
             HBox.setHgrow(details, Priority.ALWAYS);
 
+            // Create and configure the difficulty selection button.
             Button button = new Button();
             button.setGraphic(content);
             button.getStyleClass().add("difficulty-button");
             button.setId(UiIds.difficultyButton(currentDifficulty));
             button.setMaxWidth(Double.MAX_VALUE);
 
+            // Update the selected difficulty and button appearance.
             button.setOnAction(event -> {
                 selectedDifficulty = currentDifficulty;
 
@@ -114,7 +122,7 @@ public final class MainMenuView extends VBox {
             difficultyButtons.getChildren().add(button);
         }
 
-        // Play Game button
+        // Create and configure the button used to start a new game.
         Button playButton = new Button("▷   Play Game");
 
         playButton.getStyleClass().add("play-button");
@@ -122,6 +130,7 @@ public final class MainMenuView extends VBox {
         playButton.setMaxWidth(Double.MAX_VALUE);
         applyCompactSize(playButton);
 
+        // Start the selected game after the icon explosion animation.
         playButton.setOnAction(event -> {
             if (selectedDifficulty == null) {
                 return;
@@ -131,13 +140,14 @@ public final class MainMenuView extends VBox {
             iconContainer.explodeThen(() -> onPlay.accept(chosen));
         });
 
-        // View Statistics button
+        // Create and configure the button for opening game statistics.
         Button statsButton = new Button("View Statistics");
 
         statsButton.getStyleClass().add("stats-link-button");
         statsButton.setId(UiIds.STATISTICS_BUTTON);
         statsButton.setMaxWidth(Double.MAX_VALUE);
 
+        // Build a small bar chart icon for the statistics button.
         HBox chartIcon = new HBox(
                 3,
                 bar(7),
@@ -150,8 +160,10 @@ public final class MainMenuView extends VBox {
         statsButton.setGraphic(chartIcon);
         statsButton.setGraphicTextGap(10);
 
+        // Open the statistics view when the button is clicked.
         statsButton.setOnAction(event -> onViewStatistics.run());
 
+        // Add all menu components in their intended display order.
         getChildren().addAll(
                 iconContainer,
                 title,
@@ -161,11 +173,8 @@ public final class MainMenuView extends VBox {
         );
     }
 
-    /**
-     * Applies a unified compact height and appearance to an action button.
-     *
-     * @param button button to resize
-     */
+    /** Applies a unified compact height and appearance to an action button.
+     * @param button button to resize.*/
     private void applyCompactSize(Button button) {
         button.setMinHeight(ACTION_BUTTON_HEIGHT);
         button.setPrefHeight(ACTION_BUTTON_HEIGHT);
@@ -174,9 +183,7 @@ public final class MainMenuView extends VBox {
         button.getStyleClass().add("compact");
     }
 
-
-    /**
-     * Creates a vertical bar for the statistics chart icon.
+    /** Creates a vertical bar for the statistics chart icon.
      *
      * @param height height of the bar
      * @return configured rectangle representing a chart bar
@@ -191,6 +198,7 @@ public final class MainMenuView extends VBox {
         return rectangle;
     }
 }
+
 
 
 

@@ -15,20 +15,27 @@ import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
 /**
- * A layer of fireworks.
- * It does not catch a mouse and does not go beyond its limits.
+ * A transparent layer that displays animated fireworks.
+ * The layer ignores mouse events and clips all effects
+ * to its own boundaries.
  */
 final class FireworksLayer extends Pane {
 
+    /** Defines the colors used for the fireworks particles.
+     */
     private static final Color[] COLORS = {
             Color.web("#ffd166"), Color.web("#ef476f"), Color.web("#06d6a0"),
             Color.web("#4cc9f0"), Color.web("#f72585"), Color.web("#ffffff")
     };
 
+    /** Generates random positions, colors, and particle movement values. */
     private final Random random = new Random();
 
+    /** Controls the repeated launching of fireworks. */
     private Timeline launcher;
 
+    /** Creates a fireworks layer and configures its mouse transparency
+     * and clipping boundaries.*/
     FireworksLayer() {
         setMouseTransparent(true);
 
@@ -38,6 +45,9 @@ final class FireworksLayer extends Pane {
         setClip(clip);
     }
 
+    /** Starts the fireworks animation by periodically launching rockets.
+     * Stops any previously running animation before starting a new one.
+     */
     void start() {
         stop();
 
@@ -49,6 +59,8 @@ final class FireworksLayer extends Pane {
         launcher.play();
     }
 
+    /** Stops the fireworks animation and removes all active visual effects.
+     */
     void stop() {
         if (launcher != null) {
             launcher.stop();
@@ -58,6 +70,9 @@ final class FireworksLayer extends Pane {
         getChildren().clear();
     }
 
+    /** Launches a rocket from the bottom of the layer to a random position.
+     * When the rocket reaches its destination, it creates an explosion.
+     */
     private void launch() {
         double w = getWidth();
         double h = getHeight();
@@ -85,6 +100,13 @@ final class FireworksLayer extends Pane {
         up.play();
     }
 
+    /** Creates an explosion by generating multiple colored particles
+     * that move outward, gradually fade, and shrink.
+     *
+     * @param x the horizontal coordinate of the explosion center
+     * @param y the vertical coordinate of the explosion center
+     * @param color the color applied to all particles in the explosion
+     */
     private void burst(double x, double y, Color color) {
         int count = 30;
 
@@ -103,16 +125,20 @@ final class FireworksLayer extends Pane {
             Timeline t = new Timeline(
                     new KeyFrame(Duration.millis(1200),
                             new KeyValue(
-                                    spark.translateXProperty(), dx, Interpolator.EASE_OUT
+                                    spark.translateXProperty(), dx,
+                                    Interpolator.EASE_OUT
                             ),
                             new KeyValue(
-                                    spark.translateYProperty(), dy, Interpolator.EASE_OUT
+                                    spark.translateYProperty(), dy,
+                                    Interpolator.EASE_OUT
                             ),
                             new KeyValue(
-                                    spark.opacityProperty(), 0, Interpolator.EASE_IN
+                                    spark.opacityProperty(), 0,
+                                    Interpolator.EASE_IN
                             ),
                             new KeyValue(
-                                    spark.radiusProperty(), 0.5, Interpolator.LINEAR
+                                    spark.radiusProperty(), 0.5,
+                                    Interpolator.LINEAR
                             )
                     )
             );
@@ -121,3 +147,4 @@ final class FireworksLayer extends Pane {
         }
     }
 }
+

@@ -6,29 +6,42 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.StrokeLineCap;
 
-/**
- * A vector mine icon that scales to fit the cell size.
- */
+/** A vector mine icon that scales to fit the cell size.*/
 final class MineIcon extends Group {
 
-    // The original drawing is in square 100x100
+    /** Defines the scale factor used to adjust the icon size to the cell size.
+     * The original drawing uses a 100x100 coordinate system.
+     */
     private static final double SCALE_PER_CELL_PIXEL = 0.0095;
 
+    /** Defines the color of the dark spikes. */
     private static final Color DARK_SPIKE = Color.web("#2a5a8a");
+
+    /** Defines the color of the light spikes. */
     private static final Color LIGHT_SPIKE = Color.web("#6bb9d0");
+
+    /** Defines the main body color of the mine. */
     private static final Color BODY = Color.web("#2980b9");
+
+    /** Defines the color of the decorative dots. */
     private static final Color DOTS = Color.web("#243246");
+
+    /** Defines the color of the horizontal bar. */
     private static final Color BAR = Color.web("#4a5a6a");
 
+    /** Stores the coordinates of the decorative dots
+     * positioned around the center of the mine.*/
     private static final double[][] DOT_POSITIONS = {
             {50, 33}, {50, 67},
             {64.7, 41.5}, {35.3, 41.5},
             {64.7, 58.5}, {35.3, 58.5}
     };
 
+    /** Creates a mine icon and scales it according to the specified cell size.
+     * @param cellSize the size of the cell in pixels.*/
     MineIcon(int cellSize) {
 
-        // Dark spikes (diagonal lines at the top and bottom).
+        // Add dark diagonal spikes at the top and bottom of the mine.
         getChildren().addAll(
                 spike(65, 24, 70, 15.4, DARK_SPIKE),
                 spike(35, 24, 30, 15.4, DARK_SPIKE),
@@ -36,7 +49,7 @@ final class MineIcon extends Group {
                 spike(35, 76, 30, 84.6, DARK_SPIKE)
         );
 
-        // Light spikes
+        // Add light spikes around the mine to complete its outer shape.
         getChildren().addAll(
                 spike(50, 24, 50, 8, LIGHT_SPIKE),
                 spike(50, 76, 50, 92, LIGHT_SPIKE),
@@ -46,24 +59,38 @@ final class MineIcon extends Group {
                 spike(27.5, 63, 13.6, 71, LIGHT_SPIKE)
         );
 
+        // Draw the main circular body of the mine.
         getChildren().add(new Circle(50, 50, 29, BODY));
 
+        // Add decorative dots at the predefined positions.
         for (double[] p : DOT_POSITIONS) {
             getChildren().add(new Circle(p[0], p[1], 4.5, DOTS));
         }
 
+        // Draw the horizontal bar across the center of the mine.
         Line bar = new Line(10, 50, 90, 50);
         bar.setStroke(BAR);
         bar.setStrokeWidth(2.5);
         bar.setStrokeLineCap(StrokeLineCap.ROUND);
         getChildren().add(bar);
 
+        // Calculate the scale factor based on the cell size.
         double scale = cellSize * SCALE_PER_CELL_PIXEL;
 
+        // Apply uniform scaling to preserve the icon's proportions.
         setScaleX(scale);
         setScaleY(scale);
     }
 
+    /** Creates a line representing one of the mine's spikes.
+     *
+     * @param x1 the starting point's horizontal coordinate
+     * @param y1 the starting point's vertical coordinate
+     * @param x2 the ending point's horizontal coordinate
+     * @param y2 the ending point's vertical coordinate
+     * @param color the color of the spike
+     * @return the configured line representing the spike
+     */
     private static Line spike(
             double x1, double y1,
             double x2, double y2,
@@ -79,3 +106,4 @@ final class MineIcon extends Group {
         return line;
     }
 }
+

@@ -4,16 +4,13 @@ import java.util.Objects;
 
 import model.GameState;
 
-/**
- * Outcome of a finished game.
- *
+/** Outcome of a finished game.
  * @param state          how the game ended: WON, LOST_BOMB or TIMEOUT
  * @param elapsedSeconds game time in seconds, not negative
  */
 public record GameResult(GameState state, int elapsedSeconds) {
 
-    /**
-     * Validates that the result describes a finished game.
+    /** Validates that the result describes a finished game.
      */
     public GameResult {
         Objects.requireNonNull(state);
@@ -31,9 +28,7 @@ public record GameResult(GameState state, int elapsedSeconds) {
         }
     }
 
-    /**
-     * Tells whether the player won.
-     *
+    /** Tells whether the player won.
      * @return true for a win, false for a bomb or a timeout
      */
     public boolean isWon() {

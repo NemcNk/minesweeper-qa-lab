@@ -1,7 +1,6 @@
 package session;
 
-/**
- * Receives changes of a {@link GameSession}. The view implements it to
+/** Receives changes of a {@link GameSession}. The view implements it to
  * redraw itself. All methods are optional and do nothing by default.
  */
 public interface GameSessionListener {
@@ -14,48 +13,34 @@ public interface GameSessionListener {
         // no-op by default
     }
 
-    /**
-     * The number of bombs without a flag changed.
-     *
-     * @param remaining bombs minus flags
-     */
+    /** The number of bombs without a flag changed.
+     * @param remaining bombs minus flags.*/
     default void minesChanged(int remaining) {
         // no-op by default
     }
 
-    /**
-     * The displayed time changed.
-     *
+    /** The displayed time changed.
      * @param remainingSeconds seconds left until the timeout
      */
     default void timeChanged(int remainingSeconds) {
         // no-op by default
     }
 
-    /**
-     * The game was paused or resumed.
-     *
-     * @param paused true if the game is now paused
-     */
+    /** The game was paused or resumed.
+     * @param paused true if the game is now paused.*/
     default void pauseChanged(boolean paused) {
         // no-op by default
     }
 
-    /**
-     * The pause button became available or unavailable.
-     *
-     * @param available true if pausing is allowed now
-     */
+    /** The pause button became available or unavailable.
+     * @param available true if pausing is allowed now.*/
     default void pauseAvailabilityChanged(boolean available) {
         // no-op by default
     }
 
-    /**
-     * The game ended. Reported once per game, after the result has been
+    /** The game ended. Reported once per game, after the result has been
      * stored in the statistics.
-     *
-     * @param result how the game ended
-     */
+     * @param result how the game ended.*/
     default void finished(GameResult result) {
         // no-op by default
     }

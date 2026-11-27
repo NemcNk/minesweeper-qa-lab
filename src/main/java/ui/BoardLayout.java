@@ -2,8 +2,7 @@ package ui;
 
 import model.Difficulty;
 
-/**
- * Visual settings for each difficulty level are a UI concern
+/** Visual settings for each difficulty level are a UI concern
  * and therefore do not belong in the {@link Difficulty} domain model.
  */
 final class BoardLayout {

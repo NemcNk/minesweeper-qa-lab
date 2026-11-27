@@ -10,22 +10,21 @@ import model.CellContent;
 import model.CellSnapshot;
 import model.CellState;
 
-/**
- * Represents a single cell in the Minesweeper game interface.
+/** Represents a single cell in the Minesweeper game interface.
  * Displays the visual representation of the current cell state.
  */
 public final class CellView extends StackPane {
 
-    private static final double GLYPH_SCALE = 0.78;
-
+    /** Defines the width and height of the cell in pixels. */
     private final int cellSize;
+
+    /** Displays the numerical value of an opened cell. */
     private final Label numberLabel = new Label();
 
+    /** Stores the current snapshot representing the cell state and content. */
     private CellSnapshot currentCell;
 
-    /**
-     * Creates a cell view with the specified size.
-     *
+    /** Creates a cell view with the specified size.
      * @param cellSize the width and height of the cell in pixels
      */
     public CellView(int cellSize) {
@@ -48,9 +47,7 @@ public final class CellView extends StackPane {
         ));
     }
 
-    /**
-     * Updates the cell appearance according to its current state.
-     *
+    /** Updates the cell appearance according to its current state.
      * @param cell the new cell snapshot
      * @throws NullPointerException if the provided cell is null
      */
@@ -81,44 +78,32 @@ public final class CellView extends StackPane {
         }
     }
 
-    /**
-     * Returns the current cell snapshot.
-     *
-     * @return the current cell snapshot
-     */
+    /** Returns the current cell snapshot.
+     * @return the current cell snapshot*/
     public CellSnapshot getCurrentCell() {
         return currentCell;
     }
 
-    /**
-     * Displays a flag on a closed cell.
-     */
+    /** Displays a flag on a closed cell.*/
     private void showFlag() {
         getStyleClass().add("closed");
         getChildren().add(createGlyph("⚑", "cell-flag"));
     }
 
-    /**
-     * Displays an exploded mine.
-     */
+    /** Displays an exploded mine.*/
     private void showExploded() {
         getStyleClass().addAll("opened", "bombed");
         getChildren().add(new MineIcon(cellSize));
     }
 
-    /**
-     * Displays a cross indicating an incorrect flag.
-     */
+    /** Displays a cross indicating an incorrect flag.*/
     private void showWrongFlag() {
         getStyleClass().add("opened");
         getChildren().add(createGlyph("✕", "cell-wrong-flag"));
     }
 
-    /**
-     * Displays the content of an opened cell.
-     *
-     * @param content the content of the opened cell
-     */
+    /** Displays the content of an opened cell.
+     * @param content the content of the opened cell*/
     private void showOpened(CellContent content) {
         getStyleClass().add("opened");
 

@@ -23,13 +23,14 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Rectangle;
 import javafx.util.Duration;
 
-/**
- * Displays an animated bomb icon with idle radar effects
+/** Displays an animated bomb icon with idle radar effects
  * and an explosion animation.
+ * The component supports continuous idle animation, including
+ * rotation and radar pulses, as well as a multi-stage explosion effect.
  */
 public final class BombIconAnimation extends StackPane {
 
-    // Blue shades used for explosion fragments.
+    /** Defines the colors used for explosion fragments.*/
     private static final Color[] SHARD_COLORS = {
             Color.web("#2980b9"),
             Color.web("#66b8cc"),
@@ -38,31 +39,41 @@ public final class BombIconAnimation extends StackPane {
             Color.web("#2c3e50")
     };
 
+    /** Defines the color used for radar rings. */
     private static final Color RING_COLOR = Color.web("#66b8cc");
+
+    /** Defines the duration of one complete radar animation cycle. */
     private static final Duration RADAR_PERIOD = Duration.seconds(3);
 
+    /** Represents the bomb image displayed by this component. */
     private final ImageView bomb;
+
+    /** Contains all visual effects displayed above the bomb icon. */
     private final Pane fx = new Pane();
+
+    /** Provides a glow effect around the bomb icon. */
     private final DropShadow glow = new DropShadow(0, Color.web("#66b8cc"));
+
+    /** Generates random values for explosion effects and shaking. */
     private final Random random = new Random();
 
+    /** Controls the continuous rotation of the bomb icon. */
     private final RotateTransition rotation;
+
+    /** Controls the idle radar and pulse animations. */
     private final Timeline radar;
 
+    /** Indicates whether an explosion animation is currently running. */
     private boolean busy = false;
 
-    /**
-     * Creates a bomb icon with idle animation enabled.
-     *
+    /** Creates a bomb icon with idle animation enabled.
      * @param image image displayed as the bomb icon
      */
     public BombIconAnimation(Image image) {
         this(image, true);
     }
 
-    /**
-     * Creates a bomb icon with optional idle animation.
-     *
+    /** Creates a bomb icon with optional idle animation.
      * @param image image displayed as the bomb icon
      * @param idleAnimation whether idle animation should start automatically
      */
@@ -82,7 +93,7 @@ public final class BombIconAnimation extends StackPane {
         getChildren().addAll(bomb, fx);
         setViewOrder(-1);
 
-        // Rotate the icon continuously.
+        // Configure continuous rotation with a linear interpolation.
         rotation = new RotateTransition(RADAR_PERIOD, bomb);
         rotation.setByAngle(360);
         rotation.setInterpolator(Interpolator.LINEAR);
@@ -122,8 +133,8 @@ public final class BombIconAnimation extends StackPane {
         }
     }
 
-    /**
-     * Starts the idle rotation and radar animations.
+    /** Starts the idle rotation and radar animations.
+     * Any previously running idle animations are stopped before restarting.
      */
     public void start() {
         stop();
@@ -131,8 +142,8 @@ public final class BombIconAnimation extends StackPane {
         radar.play();
     }
 
-    /**
-     * Stops all idle animations and restores the original icon state.
+    /** Stops all idle animations and restores the original icon state.
+     * Also removes any remaining visual effects from the effects layer.
      */
     public void stop() {
         rotation.stop();
@@ -142,10 +153,10 @@ public final class BombIconAnimation extends StackPane {
         busy = false;
     }
 
-    /**
-     * Plays the explosion animation and executes the callback afterward.
-     *
-     * @param after action executed after the animation finishes
+    /** Plays the explosion animation and executes the callback afterward.
+     * The explosion is ignored if another explosion is already running.
+     * @param after action executed after the animation finishes;
+     *              may be null if no callback is required
      */
     public void explodeThen(Runnable after) {
         if (busy) {
@@ -187,10 +198,8 @@ public final class BombIconAnimation extends StackPane {
 
     // -------------------- Idle radar effects --------------------
 
-    /**
-     * Creates an expanding radar ring.
-     *
-     * @param delayMs delay before the ring animation starts
+    /** Creates an expanding radar ring.
+     * @param delayMs delay before the ring animation starts, in milliseconds
      */
     private void spawnRing(double delayMs) {
         Circle ring = new Circle(0, 0, 44);
@@ -217,11 +226,9 @@ public final class BombIconAnimation extends StackPane {
 
     // -------------------- Explosion preparation --------------------
 
-    /**
-     * Creates the icon charging animation.
-     *
+    /** Creates the icon charging animation.
      * @param millis animation duration in milliseconds
-     * @return charging timeline
+     * @return timeline responsible for scaling the icon and increasing its glow
      */
     private Timeline chargeTimeline(double millis) {
         return new Timeline(
@@ -232,11 +239,9 @@ public final class BombIconAnimation extends StackPane {
         );
     }
 
-    /**
-     * Creates a random shaking animation.
-     *
+    /** Creates a random shaking animation.
      * @param millis animation duration in milliseconds
-     * @return shaking timeline
+     * @return timeline responsible for randomly moving the icon
      */
     private Timeline shakeTimeline(double millis) {
         int ticks = (int) (millis / 40);
@@ -260,8 +265,8 @@ public final class BombIconAnimation extends StackPane {
         return shake;
     }
 
-    /**
-     * Restores the bomb icon to its original visual state.
+    /** Restores the bomb icon to its original visual state.
+     * Resets its scale, rotation, position, opacity, and glow intensity.
      */
     private void resetBomb() {
         bomb.setScaleX(1);
@@ -275,8 +280,8 @@ public final class BombIconAnimation extends StackPane {
 
     // -------------------- Explosion effects --------------------
 
-    /**
-     * Hides the bomb icon and launches all explosion effects.
+    /** Hides the bomb icon and launches all explosion effects.
+     * Starts the flash, shockwave, and fragment animations simultaneously.
      */
     private void explode() {
         bomb.setOpacity(0);
@@ -289,8 +294,8 @@ public final class BombIconAnimation extends StackPane {
         spawnShards();
     }
 
-    /**
-     * Creates a short expanding flash at the explosion center.
+    /** Creates a short expanding flash at the explosion center.
+     * The flash gradually increases in size and fades out.
      */
     private void spawnFlash() {
         Circle flash = new Circle(0, 0, 45, Color.web("#66b8cc"));
@@ -312,8 +317,9 @@ public final class BombIconAnimation extends StackPane {
         timeline.play();
     }
 
-    /**
-     * Creates an expanding shockwave ring.
+    /** Creates an expanding shockwave ring.
+     * The ring expands outward while its stroke gradually becomes thinner
+     * and its opacity decreases.
      */
     private void spawnShockwave() {
         Circle ring = new Circle(0, 0, 20);
@@ -334,8 +340,9 @@ public final class BombIconAnimation extends StackPane {
         timeline.play();
     }
 
-    /**
-     * Creates and animates randomly distributed explosion fragments.
+    /** Creates and animates randomly distributed explosion fragments.
+     * Each fragment moves away from the explosion center, rotates,
+     * and gradually fades out.
      */
     private void spawnShards() {
         int count = 22;
@@ -388,3 +395,4 @@ public final class BombIconAnimation extends StackPane {
         }
     }
 }
+

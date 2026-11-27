@@ -9,26 +9,20 @@ import java.util.Set;
 
 import model.Coord;
 
-/**
- * Randomly places bombs while keeping the clicked cell
- * and its neighbours free from bombs.
- */
+/** Randomly places bombs while keeping the clicked cell
+ * and its neighbours free from bombs.*/
 final class RandomBombPlacement implements BombPlacement {
 
     /** Random generator used to shuffle candidate cells. */
     private final Random random;
 
-    /**
-     * Creates a random bomb placement strategy.
-     *
-     * @param random random number generator
-     */
+    /** Creates a random bomb placement strategy.
+     * @param random random number generator.*/
     RandomBombPlacement(Random random) {
         this.random = random;
     }
 
-    /**
-     * {@inheritDoc}
+    /** {@inheritDoc}
      *
      * @throws IllegalArgumentException if there are not enough
      *         available cells after excluding the safe area

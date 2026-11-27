@@ -6,8 +6,7 @@ import java.util.List;
 
 import model.Coord;
 
-/**
- * Represents the geometry of a rectangular game board.
+/** Represents the geometry of a rectangular game board.
  * Provides methods for retrieving board coordinates,
  * checking coordinate boundaries, and finding neighboring cells.
  */
@@ -22,8 +21,7 @@ public final class BoardGeometry {
     /** Immutable list containing all board coordinates. */
     private final List<Coord> allCoords;
 
-    /**
-     * Creates a board geometry with the specified dimensions.
+    /** Creates a board geometry with the specified dimensions.
      *
      * @param columns number of columns
      * @param rows number of rows
@@ -51,36 +49,25 @@ public final class BoardGeometry {
         allCoords = Collections.unmodifiableList(coords);
     }
 
-    /**
-     * Returns the number of columns on the board.
-     *
-     * @return number of columns
-     */
+    /** Returns the number of columns on the board.
+     * @return number of columns.*/
     public int getColumns() {
         return columns;
     }
 
-    /**
-     * Returns the number of rows on the board.
-     *
-     * @return number of rows
-     */
+    /** Returns the number of rows on the board.
+     * @return number of rows.*/
     public int getRows() {
         return rows;
     }
 
-    /**
-     * Returns an immutable list of all board coordinates.
-     *
-     * @return list of all coordinates
-     */
+    /** Returns an immutable list of all board coordinates.
+     * @return list of all coordinates.*/
     public List<Coord> getAllCoords() {
         return allCoords;
     }
 
-    /**
-     * Checks whether a coordinate belongs to the board.
-     *
+    /** Checks whether a coordinate belongs to the board.
      * @param coord coordinate to validate
      * @return true if the coordinate is inside the board, false otherwise
      */
@@ -92,11 +79,8 @@ public final class BoardGeometry {
                 && coord.getY() < rows;
     }
 
-
-    /**
-     * Returns all valid neighboring coordinates surrounding a cell.
+    /** Returns all valid neighboring coordinates surrounding a cell.
      * Diagonal neighbors are included.
-     *
      * @param coord center coordinate
      * @return list of neighboring coordinates
      * @throws IndexOutOfBoundsException if the coordinate is outside the board
@@ -130,11 +114,8 @@ public final class BoardGeometry {
         return result;
     }
 
-
-    /**
-     * Returns the safe area containing the center cell
+    /** Returns the safe area containing the center cell
      * and all its valid neighboring cells.
-     *
      * @param center center coordinate of the safe area
      * @return list containing the center and its neighbors
      * @throws IndexOutOfBoundsException if the center is outside the board

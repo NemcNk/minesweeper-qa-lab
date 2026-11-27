@@ -6,13 +6,19 @@ import javafx.util.Duration;
 
 import session.Ticker;
 
-/**
- * {@link Ticker} backed by a JavaFX {@link Timeline}.
+/** An implementation of {@link Ticker} that uses a JavaFX {@link Timeline}
+ * to execute periodic tick actions.
  */
 public final class FxTicker implements Ticker {
 
+    /** The JavaFX timeline responsible for generating periodic ticks. */
     private Timeline timeline;
 
+    /** Starts the timer and executes the specified action every second.
+     * Stops any previously running timer before creating a new one.
+     *
+     * @param onTick the action to execute on each timer tick
+     */
     @Override
     public void start(Runnable onTick) {
 
@@ -25,6 +31,7 @@ public final class FxTicker implements Ticker {
         timeline.play();
     }
 
+    /** Pauses the timer if it has been initialized.*/
     @Override
     public void pause() {
 
@@ -33,6 +40,7 @@ public final class FxTicker implements Ticker {
         }
     }
 
+    /** Resumes the timer if it has been initialized.*/
     @Override
     public void resume() {
 
@@ -41,6 +49,7 @@ public final class FxTicker implements Ticker {
         }
     }
 
+    /** Stops the timer if it has been initialized.*/
     @Override
     public void stop() {
 
@@ -49,3 +58,4 @@ public final class FxTicker implements Ticker {
         }
     }
 }
+

@@ -9,8 +9,7 @@ import model.Difficulty;
 import model.GameState;
 import stats.StatsRepository;
 
-/**
- * Rules of one play session that do not depend on JavaFX: the countdown,
+/** Rules of one play session that do not depend on JavaFX: the countdown,
  * pause and resume, restart, and recording the result exactly once.
  *
  * <p>The view forwards user input to the session and redraws itself from
@@ -23,19 +22,31 @@ import stats.StatsRepository;
  */
 public final class GameSession {
 
+    /** Selected difficulty level of the game session. */
     private final Difficulty difficulty;
+
+    /** Repository used to store game results and statistics. */
     private final StatsRepository stats;
+
+    /** Game instance managed by this session. */
     private final Game game;
+
+    /** Countdown timer associated with the game session. */
     private final CountdownTimer timer;
 
+    /** Listener that receives game session state changes. */
     private GameSessionListener listener = GameSessionListener.NONE;
 
+    /** Indicates whether the game is currently paused. */
     private boolean paused;
+
+    /** Indicates whether the game has finished. */
     private boolean finished;
+
+    /** Indicates whether the session has been disposed. */
     private boolean disposed;
 
-    /**
-     * Creates a session with the time limit of the difficulty.
+    /** Creates a session with the time limit of the difficulty.
      *
      * @param difficulty selected difficulty
      * @param factory    creates the game
@@ -57,8 +68,7 @@ public final class GameSession {
         );
     }
 
-    /**
-     * Creates a session with an explicit time limit. A short limit makes
+    /** Creates a session with an explicit time limit. A short limit makes
      * the timeout easy to check.
      *
      * @param difficulty       selected difficulty
@@ -90,77 +100,53 @@ public final class GameSession {
         );
     }
 
-    /**
-     * Sets the receiver of changes. Only one listener is supported.
-     *
-     * @param newListener the view
-     */
+    /** Sets the receiver of changes. Only one listener is supported.
+     * @param newListener the view.*/
     public void setListener(GameSessionListener newListener) {
         listener = Objects.requireNonNull(newListener);
     }
 
     // State
 
-    /**
-     * Returns the board for rendering.
-     *
-     * @return read-only view of the board
-     */
+    /** Returns the board for rendering.
+     * @return read-only view of the board.*/
     public BoardReader getBoard() {
         return game;
     }
 
-    /**
-     * Returns the state of the game.
-     *
-     * @return current game state
-     */
+    /** Returns the state of the game.
+     * @return current game state.*/
     public GameState getState() {
         return game.getState();
     }
 
-    /**
-     * Returns the number of bombs without a flag.
-     *
-     * @return remaining bomb count
-     */
+    /** Returns the number of bombs without a flag.
+     * @return remaining bomb count.*/
     public int getRemainingBombs() {
         return game.getRemainingBombs();
     }
 
-    /**
-     * Returns the seconds left until the timeout.
-     *
-     * @return remaining seconds
-     */
+    /** Returns the seconds left until the timeout.
+     * @return remaining seconds.*/
     public int getRemainingSeconds() {
         return timer.getRemainingSeconds();
     }
 
-    /**
-     * Returns the seconds played so far.
-     *
-     * @return elapsed seconds
-     */
+    /** Returns the seconds played so far.
+     * @return elapsed seconds.*/
     public int getElapsedSeconds() {
         return timer.getElapsedSeconds();
     }
 
-    /**
-     * Tells whether the game is paused.
-     *
-     * @return true while paused
-     */
+    /** Tells whether the game is paused.
+     * @return true while paused.*/
     public boolean isPaused() {
         return paused;
     }
 
-    /**
-     * Tells whether pausing is allowed: the first move has been made and
+    /** Tells whether pausing is allowed: the first move has been made and
      * the game is still running.
-     *
-     * @return true if {@link #togglePause()} has an effect
-     */
+     * @return true if {@link #togglePause()} has an effect.*/
     public boolean isPauseAvailable() {
         return !disposed
                 && !finished
@@ -170,13 +156,10 @@ public final class GameSession {
 
     // Input
 
-    /**
-     * Handles a left click. The first accepted click starts the timer.
+    /** Handles a left click. The first accepted click starts the timer.
      * Ignored while paused, after the game has ended and after
      * {@link #dispose()}.
-     *
-     * @param coord clicked cell
-     */
+     * @param coord clicked cell.*/
     public void leftClick(Coord coord) {
         if (!acceptsInput()) {
             return;
@@ -194,12 +177,9 @@ public final class GameSession {
         afterMove();
     }
 
-    /**
-     * Handles a right click (flag). Does not start the timer. Ignored in
+    /** Handles a right click (flag). Does not start the timer. Ignored in
      * the same situations as {@link #leftClick(Coord)}.
-     *
-     * @param coord clicked cell
-     */
+     * @param coord clicked cell.*/
     public void rightClick(Coord coord) {
         if (!acceptsInput()) {
             return;
@@ -210,10 +190,8 @@ public final class GameSession {
         afterMove();
     }
 
-    /**
-     * Pauses a running game or resumes a paused one. Does nothing before
-     * the first move and after the game has ended.
-     */
+    /** Pauses a running game or resumes a paused one. Does nothing before
+     * the first move and after the game has ended.*/
     public void togglePause() {
         if (!isPauseAvailable()) {
             return;
@@ -230,11 +208,9 @@ public final class GameSession {
         listener.pauseChanged(paused);
     }
 
-    /**
-     * Starts a new game on the same board: the timer, the pause and the
+    /** Starts a new game on the same board: the timer, the pause and the
      * recorded-result flag are reset. A game abandoned before it ended is
-     * not counted in the statistics.
-     */
+     * not counted in the statistics.*/
     public void restart() {
         if (disposed) {
             return;
@@ -255,11 +231,9 @@ public final class GameSession {
         listener.restarted();
     }
 
-    /**
-     * Stops the timer and ignores all further input. Called when the
+    /** Stops the timer and ignores all further input. Called when the
      * player leaves the game screen. A game left unfinished is not
-     * counted in the statistics.
-     */
+     * counted in the statistics.*/
     public void dispose() {
         disposed = true;
 
@@ -326,3 +300,4 @@ public final class GameSession {
         listener.finished(result);
     }
 }
+

@@ -4,10 +4,8 @@ import core.Game;
 import logging.GameEventLogger;
 import model.Difficulty;
 
-/**
- * Production {@link GameFactory}: random bomb layout, game events are
- * written to the log.
- */
+/** Production {@link GameFactory}: random bomb layout, game events are
+ * written to the log.*/
 public final class RandomGameFactory implements GameFactory {
 
     @Override

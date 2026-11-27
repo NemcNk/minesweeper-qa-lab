@@ -1,17 +1,17 @@
 package model;
 
-/**
- * An immutable object that stores information about a cell
- * at a specific point in time and allows it to be compared
- * with other snapshots.
- */
+/** Represents an immutable snapshot of a cell at a specific point in time.
+ * The snapshot stores the cell content and state and can be compared
+ * with other snapshots.*/
 public final class CellSnapshot {
 
+    /** The content stored in this snapshot.*/
     private final CellContent content;
+
+    /** The state of the cell stored in this snapshot.*/
     private final CellState state;
 
-    /**
-     * Creates a snapshot of a cell with the specified content and state.
+    /** Creates a snapshot of a cell with the specified content and state.
      *
      * @param content the content of the cell
      * @param state the current state of the cell
@@ -31,30 +31,27 @@ public final class CellSnapshot {
         this.state = state;
     }
 
-    /**
-     * Returns the content stored in this snapshot.
+    /** Returns the content stored in this snapshot.
      *
-     * @return the cell content
-     */
+     * @return the cell content.*/
     public CellContent getContent() {
         return content;
     }
 
-    /**
-     * Returns the state stored in this snapshot.
+    /** Returns the state stored in this snapshot.
      *
-     * @return the cell state
-     */
+     * @return the cell state.*/
     public CellState getState() {
         return state;
     }
 
-    /**
-     * Checks whether this snapshot is equal to another object.
+    /** Compares this snapshot with the specified object.
+     * Two snapshots are considered equal if they contain
+     * the same cell content and state.
      *
-     * @param object the object to compare with
-     * @return true if both snapshots contain the same content and state
-     */
+     * @param object the object to compare with this snapshot
+     * @return true if the specified object is an equal snapshot,
+     *         false otherwise.*/
     @Override
     public boolean equals(Object object) {
         if (this == object) {
@@ -69,14 +66,13 @@ public final class CellSnapshot {
                 && state == cell.state;
     }
 
-    /**
-     * Calculates the hash code based on the cell content and state.
+    /** Calculates the hash code using the cell content and state.
      *
-     * @return the hash code of this snapshot
-     */
+     * @return the hash code of this snapshot.*/
     @Override
     public int hashCode() {
         return java.util.Objects.hash(content, state);
     }
 }
+
 

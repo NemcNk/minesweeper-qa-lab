@@ -11,10 +11,8 @@ import session.GameSession;
 import session.RandomGameFactory;
 import stats.StatsRepository;
 
-/**
- * Controls navigation between the main menu, game screen,
- * and statistics screen.
- */
+/** Controls navigation between the main menu, game screen,
+ * and statistics screen.*/
 public final class MinesweeperController {
 
     /** Root container used to display application screens. */
@@ -26,31 +24,23 @@ public final class MinesweeperController {
     /** Repository used to access game statistics. */
     private final StatsRepository stats;
 
-    /**
-     * Creates a controller for the Minesweeper application.
-     *
+    /** Creates a controller for the Minesweeper application.
      * @param stage the main application window
-     * @param stats the repository for game statistics
-     */
+     * @param stats the repository for game statistics.*/
     public MinesweeperController(Stage stage, StatsRepository stats) {
         this.stage = Objects.requireNonNull(stage);
         this.stats = Objects.requireNonNull(stats);
     }
 
-    /**
-     * Creates and returns the main application content.
-     *
-     * @return the root container
-     */
+    /** Creates and returns the main application content.
+     * @return the root container.*/
     public StackPane createContent() {
         showMenu();
 
         return root;
     }
 
-    /**
-     * Displays the main menu.
-     */
+    /** Displays the main menu.*/
     private void showMenu() {
         MainMenuView menu = new MainMenuView(
                 this::startGame,
@@ -62,11 +52,8 @@ public final class MinesweeperController {
         resizeWindow(420, 850);
     }
 
-    /**
-     * Starts a new game with the selected difficulty.
-     *
-     * @param difficulty the selected game difficulty
-     */
+    /** Starts a new game with the selected difficulty.
+     * @param difficulty the selected game difficulty.*/
     private void startGame(Difficulty difficulty) {
         // The controller wires the session: random bombs, the real
         // statistics repository and a JavaFX clock.
@@ -95,9 +82,7 @@ public final class MinesweeperController {
         });
     }
 
-    /**
-     * Displays the game statistics screen.
-     */
+    /** Displays the game statistics screen.*/
     private void showStatistics() {
         StatisticsView statistics = new StatisticsView(
                 stats,
@@ -109,12 +94,10 @@ public final class MinesweeperController {
         resizeWindow(520, 420);
     }
 
-    /**
-     * Resizes the application window and centers it on the screen.
+    /** Resizes the application window and centers it on the screen.
      *
      * @param width the desired window width
-     * @param height the desired window height
-     */
+     * @param height the desired window height.*/
     private void resizeWindow(double width, double height) {
         stage.setWidth(width);
         stage.setHeight(height);

@@ -18,19 +18,21 @@ import model.Difficulty;
 import stats.DifficultyStats;
 import stats.StatsRepository;
 
-/**
- * View displaying statistics for each difficulty level.
+/** View displaying statistics for each difficulty level.
  * The player can delete all statistics after a confirmation.
  */
 public final class StatisticsView extends VBox {
 
+    /** Provides access to stored game statistics. */
     private final StatsRepository stats;
+
+    /** Determines whether the player confirms the statistics reset. */
     private final BooleanSupplier confirmReset;
+
+    /** Contains the statistics table. */
     private final VBox card = new VBox();
 
-    /**
-     * Creates the statistics view.
-     *
+    /** Creates the statistics view using the default confirmation dialog.
      * @param stats repository containing game statistics
      * @param backAction action to execute when returning to the menu
      */
@@ -38,9 +40,7 @@ public final class StatisticsView extends VBox {
         this(stats, backAction, StatisticsView::askToConfirmReset);
     }
 
-    /**
-     * Creates the statistics view with a custom confirmation.
-     *
+    /** Creates the statistics view with a custom confirmation handler.
      * @param stats repository containing game statistics
      * @param backAction action to execute when returning to the menu
      * @param confirmReset returns true if the player confirms the reset
@@ -50,63 +50,74 @@ public final class StatisticsView extends VBox {
             Runnable backAction,
             BooleanSupplier confirmReset
     ) {
+        // Validate and store the required dependencies.
         this.stats = Objects.requireNonNull(stats);
         this.confirmReset = Objects.requireNonNull(confirmReset);
 
+        // Configure the main view layout.
         setAlignment(Pos.CENTER);
         setSpacing(20);
 
         getStyleClass().add("menu-root");
         setId(UiIds.STATISTICS_VIEW);
 
+        // Create and configure the statistics screen title.
         Label title = new Label("Statistics");
         title.getStyleClass().add("statistics-title");
 
+        // Configure the container holding the statistics table.
         card.getStyleClass().add("statistics-card");
         card.setAlignment(Pos.CENTER);
         card.setMaxWidth(USE_PREF_SIZE);
 
+        // Populate the table with the current statistics.
         refreshTable();
 
+        // Create the button used to return to the main menu.
         Button backButton = new Button("←   Back to menu");
         backButton.getStyleClass().add("back-button");
         backButton.setId(UiIds.STATISTICS_BACK_BUTTON);
         backButton.setOnAction(event -> backAction.run());
 
+        // Create the button used to reset all stored statistics.
         Button resetButton = new Button("Reset statistics");
         resetButton.getStyleClass().add("stats-link-button");
         resetButton.setId(UiIds.STATISTICS_RESET_BUTTON);
         resetButton.setOnAction(event -> resetStatistics());
 
+        // Arrange the navigation and reset buttons horizontally.
         HBox buttons = new HBox(12, backButton, resetButton);
         buttons.setAlignment(Pos.CENTER);
 
+        // Add all interface elements to the main view.
         getChildren().addAll(title, card, buttons);
     }
 
-    /**
-     * Deletes all statistics if the player confirms, then redraws
-     * the table.
-     */
+    /** Deletes all statistics if the player confirms the operation,
+     * then refreshes the displayed table.*/
     private void resetStatistics() {
+
+        // Stop the operation if the player cancels the confirmation.
         if (!confirmReset.getAsBoolean()) {
             return;
         }
 
+        // Clear the repository and update the displayed statistics.
         stats.reset();
         refreshTable();
     }
 
-    /**
-     * Rebuilds the table from the repository.
+    /** Rebuilds the statistics table using the data from the repository.
      */
     private void refreshTable() {
+        // Create and configure a new grid for the statistics.
         GridPane table = new GridPane();
 
         table.setHgap(30);
         table.setVgap(12);
         table.setAlignment(Pos.CENTER);
 
+        // Define the column headers.
         String[] headers = {
                 "Difficulty",
                 "Wins",
@@ -114,12 +125,14 @@ public final class StatisticsView extends VBox {
                 "Best time"
         };
 
+        // Add the header labels to the first row.
         for (int col = 0; col < headers.length; col++) {
             table.add(cell(headers[col], true), col, 0);
         }
 
         int row = 1;
 
+        // Populate the table with statistics for each difficulty level.
         for (Difficulty difficulty : Difficulty.values()) {
             DifficultyStats entry = stats.get(difficulty);
 
@@ -130,10 +143,12 @@ public final class StatisticsView extends VBox {
                     false
             );
 
+            // Assign unique identifiers to the statistics labels.
             wins.setId(UiIds.statsWins(difficulty));
             losses.setId(UiIds.statsLosses(difficulty));
             best.setId(UiIds.statsBestTime(difficulty));
 
+            // Add the difficulty name and its statistics to the current row.
             table.add(cell(difficulty.getTitle(), false), 0, row);
             table.add(wins, 1, row);
             table.add(losses, 2, row);
@@ -142,26 +157,30 @@ public final class StatisticsView extends VBox {
             row++;
         }
 
+        // Replace the previous table with the updated one.
         card.getChildren().setAll(table);
     }
 
-    /**
-     * Asks the player to confirm the deletion.
-     * Cancel is the default button to prevent accidental deletion.
+    /** Displays a confirmation dialog before deleting all statistics.
+     * The Cancel button is selected by default to prevent accidental deletion.
      *
-     * @return true if the player chose Reset
+     * @return true if the player chose Reset, otherwise false
      */
     private static boolean askToConfirmReset() {
+
+        // Define the confirmation button.
         ButtonType reset = new ButtonType(
                 "Reset",
                 ButtonBar.ButtonData.OK_DONE
         );
 
+        // Define the cancellation button.
         ButtonType cancel = new ButtonType(
                 "Cancel",
                 ButtonBar.ButtonData.CANCEL_CLOSE
         );
 
+        // Create a confirmation dialog explaining the consequences of the reset.
         Alert alert = new Alert(
                 Alert.AlertType.CONFIRMATION,
                 "All wins, losses and best times will be deleted. "
@@ -173,29 +192,31 @@ public final class StatisticsView extends VBox {
         alert.setTitle("Reset statistics");
         alert.setHeaderText("Reset all statistics?");
 
+        // Prevent the Reset button from being activated by default.
         ((Button) alert.getDialogPane().lookupButton(reset))
                 .setDefaultButton(false);
 
+        // Make Cancel the default button to avoid accidental deletion.
         ((Button) alert.getDialogPane().lookupButton(cancel))
                 .setDefaultButton(true);
 
+        // Return true only when the player explicitly confirms the reset.
         return alert.showAndWait()
                 .filter(button -> button == reset)
                 .isPresent();
     }
 
-    /**
-     * Creates a table cell with the appropriate CSS classes.
-     *
+    /** Creates a table cell with the appropriate CSS classes.
      * @param text text displayed in the cell
      * @param header whether the cell is a header
-     * @return configured label
-     */
+     * @return configured label.*/
     private Label cell(String text, boolean header) {
         Label label = new Label(text);
 
+        // Apply the common CSS style to the cell.
         label.getStyleClass().add("statistics-cell");
 
+        // Apply the additional header style when necessary.
         if (header) {
             label.getStyleClass().add("header");
         }
@@ -203,20 +224,21 @@ public final class StatisticsView extends VBox {
         return label;
     }
 
-    /**
-     * Formats a time in seconds as minutes and seconds.
-     *
+    /** Formats a time in seconds as minutes and seconds.
      * @param seconds optional time in seconds
-     * @return formatted time or an em dash if unavailable
-     */
+     * @return formatted time or an em dash if unavailable.*/
     private String formatTime(OptionalInt seconds) {
+
+        // Display an em dash when no best time has been recorded.
         if (seconds.isEmpty()) {
             return "—";
         }
 
         int value = seconds.getAsInt();
 
+        // Convert seconds into minutes and remaining seconds.
         return String.format("%d:%02d", value / 60, value % 60);
     }
 }
+
 

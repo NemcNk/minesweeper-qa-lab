@@ -1,15 +1,23 @@
 package model;
 
-/**
- * Represents the available difficulty levels of the Minesweeper game.
+/** Represents the available difficulty levels of the Minesweeper game.
  * Each level defines the board size, number of mines, and time limit.
  */
 public enum Difficulty {
 
+    /** Easy difficulty level with a small board and few mines. */
     EASY("Easy", 8, 10, 10),
+
+    /** Medium difficulty level with a moderately sized board. */
     MEDIUM("Medium", 12, 20, 20),
+
+    /** Hard difficulty level with a larger board and more mines. */
     HARD("Hard", 16, 40, 40),
+
+    /** Expert difficulty level with a large board and many mines. */
     EXPERT("Expert", 20, 80, 80),
+
+    /** God difficulty level with the largest board and most mines. */
     GOD("God", 24, 150, 150);
 
     /** Display name of the difficulty level. */
@@ -24,14 +32,12 @@ public enum Difficulty {
     /** Time limit for the game in minutes. */
     private final int timeMinutes;
 
-    /**
-     * Creates a difficulty level with the specified parameters.
+    /** Creates a difficulty level with the specified parameters.
      *
      * @param title display name of the difficulty level
      * @param size board width and height
      * @param mines number of mines
-     * @param timeMinutes game time limit in minutes
-     */
+     * @param timeMinutes game time limit in minutes.*/
     Difficulty(String title, int size, int mines, int timeMinutes) {
         this.title = title;
         this.size = size;
@@ -39,47 +45,32 @@ public enum Difficulty {
         this.timeMinutes = timeMinutes;
     }
 
-    /**
-     * Returns the display name of the difficulty level.
-     *
-     * @return difficulty title
-     */
+    /** Returns the display name of the difficulty level.
+     * @return difficulty title.*/
     public String getTitle() {
         return title;
     }
 
-    /**
-     * Returns the board size.
-     *
-     * @return board width and height
-     */
+    /** Returns the board size.
+     * @return board width and height.*/
     public int getSize() {
         return size;
     }
 
-    /**
-     * Returns the number of mines.
-     *
-     * @return number of mines
-     */
+    /** Returns the number of mines.
+     * @return number of mines.*/
     public int getMines() {
         return mines;
     }
 
-    /**
-     * Returns the game time limit.
-     *
-     * @return time limit in minutes
-     */
+    /** Returns the game time limit.
+     * @return time limit in minutes.*/
     public int getTimeMinutes() {
         return timeMinutes;
     }
 
-    /**
-     * Creates a game configuration based on this difficulty level.
-     *
-     * @return a new game configuration
-     */
+    /** Creates a game configuration based on this difficulty level.
+     * @return a new game configuration.*/
     public GameConfig createConfig() {
         return new GameConfig(size, size, mines);
     }

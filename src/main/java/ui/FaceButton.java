@@ -13,24 +13,32 @@ import javafx.scene.shape.StrokeLineCap;
 import javafx.scene.shape.StrokeLineJoin;
 import javafx.util.Duration;
 
-/**
- * Restart button with an animated smiley face.
- */
+/** A restart button that displays an animated smiley face
+ * representing the current game state.*/
 public final class FaceButton extends Canvas {
 
     /**
-     * Represents the face states depending on the game result.
+     * Defines the possible facial expressions based on the game result.
      */
     public enum Face {
+
+        /** The game is currently in progress. */
         PLAYING,
+
+        /** The game has been lost. */
         LOST,
+
+        /** The game has been won. */
         WON
     }
 
+    /** The width and height of the button in pixels. */
     private static final int SIZE = 42;
 
+    /** The primary color used for drawing facial features. */
     private static final Color INK = Color.web("#4A2F12");
 
+    /** The radial gradient used to fill the smiley face. */
     private static final RadialGradient HEAD = new RadialGradient(
             0, 0,
             0.5, 0.32, 0.65,
@@ -40,12 +48,11 @@ public final class FaceButton extends Canvas {
             new Stop(1.0, Color.web("#F2A01E"))
     );
 
+    /** The current facial expression displayed by the button. */
     private Face face = Face.PLAYING;
 
-    /**
-     * Creates a restart button.
-     *
-     * @param restartAction action performed when the button is clicked
+    /** Creates a new restart button and initializes its mouse event handlers.
+     * @param restartAction the action to execute when the button is clicked
      */
     public FaceButton(Runnable restartAction) {
         super(SIZE, SIZE);
@@ -67,11 +74,9 @@ public final class FaceButton extends Canvas {
         draw();
     }
 
-    /**
-     * Sets a new face state.
-     *
-     * @param newFace the new face state
-     */
+    /** Updates the facial expression and plays an animation
+     * when the game reaches a final state.
+     * @param newFace the new facial expression to display.*/
     public void setFace(Face newFace) {
         if (newFace == face) {
             return;
@@ -85,8 +90,7 @@ public final class FaceButton extends Canvas {
         }
     }
 
-    /**
-     * Plays a scaling animation.
+    /** Plays a short scaling animation to emphasize the game result.
      */
     private void pop() {
         ScaleTransition transition =
@@ -100,8 +104,7 @@ public final class FaceButton extends Canvas {
         transition.play();
     }
 
-    /**
-     * Redraws the button according to the current face state.
+    /** Clears and redraws the entire button according to the current game state.
      */
     private void draw() {
         GraphicsContext gc = getGraphicsContext2D();
@@ -129,9 +132,10 @@ public final class FaceButton extends Canvas {
     }
 
     /**
-     * Draws the smiley face head.
+     * Draws the circular head with a gradient fill, outline,
+     * and a subtle highlight.
      *
-     * @param gc the graphics context
+     * @param gc the graphics context used for drawing
      */
     private void drawHead(GraphicsContext gc) {
         gc.setFill(HEAD);
@@ -145,11 +149,8 @@ public final class FaceButton extends Canvas {
         gc.fillOval(22, 8, 56, 26);
     }
 
-    /**
-     * Draws a smiling face.
-     *
-     * @param gc the graphics context
-     */
+    /** Draws a smiling facial expression representing an active game.
+     * @param gc the graphics context used for drawing.*/
     private void drawPlaying(GraphicsContext gc) {
         eye(gc, 35, 41, 4.5, 6.5);
         eye(gc, 65, 41, 4.5, 6.5);
@@ -163,11 +164,8 @@ public final class FaceButton extends Canvas {
         gc.stroke();
     }
 
-    /**
-     * Draws a losing face.
-     *
-     * @param gc the graphics context
-     */
+    /** Draws a sad facial expression representing a lost game.
+     * @param gc the graphics context used for drawing.*/
     private void drawLost(GraphicsContext gc) {
         brows(gc);
 
@@ -180,11 +178,8 @@ public final class FaceButton extends Canvas {
         openMouth(gc);
     }
 
-    /**
-     * Draws the eyebrows.
-     *
-     * @param gc the graphics context
-     */
+    /** Draws the eyebrows used in the losing facial expression.
+     * @param gc the graphics context used for drawing.*/
     private static void brows(GraphicsContext gc) {
         gc.setStroke(INK);
         gc.setLineWidth(4);
@@ -200,21 +195,16 @@ public final class FaceButton extends Canvas {
         gc.stroke();
     }
 
-    /**
-     * Draws an open mouth.
-     *
-     * @param gc the graphics context
-     */
+    /** Draws an open oval-shaped mouth representing sadness.
+     * @param gc the graphics context used for drawing.*/
     private static void openMouth(GraphicsContext gc) {
         gc.setFill(INK);
         gc.fillOval(42, 60, 16, 24);
     }
 
-    /**
-     * Draws a winning face.
-     *
-     * @param gc the graphics context
-     */
+    /** Draws a happy facial expression with star-shaped eyes
+     * and a smiling mouth representing a won game.
+     * @param gc the graphics context used for drawing.*/
     private void drawWon(GraphicsContext gc) {
         star(gc, 34, 40, 14, 6);
         star(gc, 66, 40, 14, 6);
@@ -245,15 +235,13 @@ public final class FaceButton extends Canvas {
         gc.restore();
     }
 
-    /**
-     * Draws an eye.
+    /** Draws an oval-shaped eye at the specified coordinates.
      *
-     * @param gc the graphics context
-     * @param cx the horizontal center coordinate
-     * @param cy the vertical center coordinate
-     * @param rx the horizontal radius
-     * @param ry the vertical radius
-     */
+     * @param gc the graphics context used for drawing
+     * @param cx the horizontal coordinate of the eye center
+     * @param cy the vertical coordinate of the eye center
+     * @param rx the horizontal radius of the eye
+     * @param ry the vertical radius of the eye.*/
     private static void eye(
             GraphicsContext gc,
             double cx,
@@ -265,14 +253,12 @@ public final class FaceButton extends Canvas {
         gc.fillOval(cx - rx, cy - ry, rx * 2, ry * 2);
     }
 
-    /**
-     * Draws a cross-shaped eye.
+    /** Draws a cross-shaped eye centered at the specified coordinates.
      *
-     * @param gc the graphics context
-     * @param cx the horizontal center coordinate
-     * @param cy the vertical center coordinate
-     * @param r the cross size
-     */
+     * @param gc the graphics context used for drawing
+     * @param cx the horizontal coordinate of the cross center
+     * @param cy the vertical coordinate of the cross center
+     * @param r the length of each half of the cross.*/
     private static void cross(
             GraphicsContext gc,
             double cx,
@@ -287,15 +273,13 @@ public final class FaceButton extends Canvas {
         gc.stroke();
     }
 
-    /**
-     * Draws a five-pointed star.
+    /** Draws a five-pointed star using alternating outer and inner vertices.
      *
-     * @param gc the graphics context
-     * @param cx the horizontal center coordinate
-     * @param cy the vertical center coordinate
-     * @param outer the outer radius
-     * @param inner the inner radius
-     */
+     * @param gc the graphics context used for drawing
+     * @param cx the horizontal coordinate of the star center
+     * @param cy the vertical coordinate of the star center
+     * @param outer the radius of the outer vertices
+     * @param inner the radius of the inner vertices.*/
     private static void star(
             GraphicsContext gc,
             double cx,
@@ -322,5 +306,3 @@ public final class FaceButton extends Canvas {
         gc.strokePolygon(xs, ys, 10);
     }
 }
-
-

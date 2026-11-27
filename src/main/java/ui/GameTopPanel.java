@@ -8,23 +8,23 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 
-/**
- * Represents the top panel of the Minesweeper game.
+/** Represents the top panel of the Minesweeper game.
  * Displays the mine counter, timer and restart button.
  */
 public final class GameTopPanel extends StackPane {
 
+    /** Displays the number of remaining mines. */
     private final SevenSegmentDisplay mineDisplay =
             new SevenSegmentDisplay();
 
+    /** Displays the elapsed game time. */
     private final SevenSegmentDisplay timeDisplay =
             new SevenSegmentDisplay(5, true);
 
+    /** Button used to restart the game and indicate its state. */
     private final FaceButton faceButton;
 
-    /**
-     * Creates the game top panel.
-     *
+    /** Creates the game top panel.
      * @param restartAction action performed when the face button is clicked
      */
     public GameTopPanel(final Runnable restartAction) {
@@ -98,29 +98,20 @@ public final class GameTopPanel extends StackPane {
         setAlignment(Pos.CENTER);
     }
 
-    /**
-     * Updates the displayed number of remaining mines.
-     *
-     * @param mines number of remaining mines
-     */
+    /** Updates the displayed number of remaining mines.
+     * @param mines number of remaining mines.*/
     public void updateMines(final int mines) {
         mineDisplay.setValue(mines);
     }
 
-    /**
-     * Updates the game timer.
-     *
-     * @param seconds elapsed game time in seconds
-     */
+    /** Updates the game timer.
+     * @param seconds elapsed game time in seconds.*/
     public void updateTime(final int seconds) {
         timeDisplay.setTime(seconds);
     }
 
-    /**
-     * Changes the face button appearance.
-     *
-     * @param face new face state
-     */
+    /** Changes the face button appearance.
+     * @param face new face state.*/
     public void setFace(final FaceButton.Face face) {
         faceButton.setFace(face);
     }

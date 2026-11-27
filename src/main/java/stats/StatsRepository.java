@@ -2,13 +2,11 @@ package stats;
 
 import model.Difficulty;
 
-/**
- * Game result repository. UI depends on this interface,
+/** Game result repository. UI depends on this interface,
  * not on a specific implementation (memory, file, database).
  */
 public interface StatsRepository {
-    /**
-     * Records a win and updates the best time if this one is faster.
+    /** Records a win and updates the best time if this one is faster.
      *
      * @param difficulty difficulty of the finished game, must not be null
      * @param seconds    completion time, must not be negative
@@ -21,10 +19,8 @@ public interface StatsRepository {
 
     DifficultyStats get(Difficulty difficulty);
 
-    /**
-     * Deletes the statistics of every difficulty: wins, losses and best
-     * times all become empty. The change cannot be undone.
-     */
+    /** Deletes the statistics of every difficulty: wins, losses and best
+     * times all become empty. The change cannot be undone.*/
     void reset();
 }
 

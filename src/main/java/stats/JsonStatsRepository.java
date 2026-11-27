@@ -16,9 +16,9 @@ import java.util.Objects;
 import java.util.OptionalInt;
 
 /**
- * Statistics stored in a JSON file.
+ * A statistics repository that stores game results in a JSON file.
  *
- * <p>File format (version 1):
+ * <p>The file uses the following format (version 1):
  * <pre>
  * {
  *   "version" : 1,
@@ -28,35 +28,51 @@ import java.util.OptionalInt;
  * }
  * </pre>
  *
- * <p>The file is read once in the constructor and rewritten after every
- * recorded result. A damaged file is moved aside to
- * {@code <name>.corrupt} and the repository starts empty. A failed save is
- * logged and never interrupts the game.
+ * <p>The file is loaded once when the repository is created and updated
+ * after every recorded result. If the file is corrupted, it is moved to
+ * {@code <name>.corrupt}, and the repository starts with empty statistics.
+ * Save failures are logged without interrupting the game.
  */
 public final class JsonStatsRepository implements StatsRepository {
 
+    /** Name of the logger used for statistics repository operations.*/
     private static final String LOGGER_NAME = "minesweeper.stats";
 
+    /** Current version of the JSON statistics file format.*/
     private static final int FORMAT_VERSION = 1;
 
+    /** Logger used to report loading and saving errors.*/
     private final System.Logger log;
+
+    /** Absolute path to the JSON statistics file.*/
     private final Path file;
+
+    /** Directory containing the JSON statistics file.*/
     private final Path directory;
+
+    /** Jackson object mapper used to read and write JSON data.*/
     private final ObjectMapper mapper = new ObjectMapper();
+
+    /** Statistics indexed by difficulty level.*/
     private final Map<Difficulty, DifficultyStats> stats =
             new EnumMap<>(Difficulty.class);
 
-    /**
-     * Opens the repository and loads the file if it exists.
-     *
-     * @param file location of the JSON file, created on the first save
+    /** Creates a repository and loads statistics from the specified file.
+     * @param file path to the JSON file, created on the first save
      * @throws IllegalArgumentException if the path has no parent directory
      */
     public JsonStatsRepository(Path file) {
         this(file, System.getLogger(LOGGER_NAME));
     }
 
-    // Package-private for tests: the caller supplies a recording logger
+    /** Creates a repository using the specified logger.
+     * <p>This constructor has package-private visibility to allow tests
+     * to provide a recording logger.
+     * @param file path to the JSON statistics file
+     * @param log logger used to report loading and saving errors
+     * @throws NullPointerException if the file or logger is null
+     * @throws IllegalArgumentException if the path has no parent directory
+     */
     JsonStatsRepository(Path file, System.Logger log) {
         this.log = Objects.requireNonNull(log);
 
@@ -75,10 +91,10 @@ public final class JsonStatsRepository implements StatsRepository {
         load();
     }
 
-    /**
-     * Returns the default location of the statistics file:
+    /** Returns the default location of the statistics file.
+     * <p>The file is stored at
      * {@code ~/.minesweeper-qa-lab/statistics.json}.
-     */
+     * @return default statistics file path.*/
     public static Path defaultFile() {
         return Path.of(
                 System.getProperty("user.home"),
@@ -87,19 +103,32 @@ public final class JsonStatsRepository implements StatsRepository {
         );
     }
 
+    /** Records a win for the specified difficulty level.
+     * @param difficulty difficulty level of the completed game
+     * @param seconds time taken to complete the game, in seconds
+     */
     @Override
     public void recordWin(Difficulty difficulty, int seconds) {
-        // withWin validates the time before anything is stored.
+        // Validate the completion time before updating the statistics.
         stats.put(difficulty, get(difficulty).withWin(seconds));
         save();
     }
 
+    /** Records a loss for the specified difficulty level.
+     * @param difficulty difficulty level of the lost game.*/
     @Override
     public void recordLoss(Difficulty difficulty) {
         stats.put(difficulty, get(difficulty).withLoss());
         save();
     }
 
+    /** Returns statistics for the specified difficulty level.
+     * <p>If no results have been recorded for this difficulty,
+     * empty statistics are returned.
+     * @param difficulty difficulty level to retrieve statistics for
+     * @return statistics associated with the specified difficulty
+     * @throws NullPointerException if the difficulty is null
+     */
     @Override
     public DifficultyStats get(Difficulty difficulty) {
         Objects.requireNonNull(difficulty);
@@ -107,22 +136,21 @@ public final class JsonStatsRepository implements StatsRepository {
         return stats.getOrDefault(difficulty, DifficultyStats.EMPTY);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>The file is rewritten with empty statistics through the same
-     * atomic write as every other save, so a crash cannot leave a
-     * half-written file. A backup of a damaged file ({@code .corrupt})
-     * is not touched.
-     */
+    /** Resets all statistics and saves the empty state to the file.
+     * <p>The file is rewritten using the same atomic write mechanism
+     * as regular saves, preventing partially written data after a crash.
+     * Existing backups of corrupted files are not modified.
+     * {@inheritDoc}*/
     @Override
     public void reset() {
         stats.clear();
         save();
     }
 
-    // Loading
-
+    /** Loads statistics from the JSON file.
+     * <p>If the file does not exist, the repository remains empty.
+     * If reading or parsing fails, the corrupted file is moved aside.
+     */
     private void load() {
 
         if (!Files.exists(file)) {
@@ -132,7 +160,7 @@ public final class JsonStatsRepository implements StatsRepository {
         try {
             JsonNode root = mapper.readTree(file.toFile());
 
-            // An empty file simply means "no data yet".
+            // An empty file means that no statistics have been saved yet.
             if (root.isMissingNode()) {
                 return;
             }
@@ -149,6 +177,11 @@ public final class JsonStatsRepository implements StatsRepository {
         }
     }
 
+    /** Validates the root JSON object and reads statistics for each difficulty.
+     * @param root root JSON node containing the repository data
+     * @throws IllegalArgumentException if the root structure or format
+     *                                  version is invalid
+     */
     private void readRoot(JsonNode root) {
 
         if (!root.isObject()) {
@@ -165,6 +198,7 @@ public final class JsonStatsRepository implements StatsRepository {
 
         JsonNode entries = root.path("stats");
 
+        // Read only entries corresponding to known difficulty levels.
         for (Difficulty difficulty : Difficulty.values()) {
             JsonNode node = entries.path(difficulty.name());
 
@@ -174,6 +208,11 @@ public final class JsonStatsRepository implements StatsRepository {
         }
     }
 
+    /** Reads and validates statistics for a single difficulty level.
+     * @param node JSON object containing wins, losses, and the best time
+     * @return validated statistics entry
+     * @throws IllegalArgumentException if any numeric field is invalid
+     */
     private static DifficultyStats readEntry(JsonNode node) {
 
         int wins = readInt(node, "wins");
@@ -185,10 +224,17 @@ public final class JsonStatsRepository implements StatsRepository {
                 ? OptionalInt.empty()
                 : OptionalInt.of(readInt(node, "bestTimeSeconds"));
 
-        // The record rejects negative values.
+        // DifficultyStats performs additional validation of the values.
         return new DifficultyStats(wins, losses, bestTime);
     }
 
+    /** Reads an integer field from a JSON object.
+     * @param node JSON object containing the requested field
+     * @param field name of the field to read
+     * @return integer value of the field
+     * @throws IllegalArgumentException if the field is missing or is not
+     *                                  an integer
+     */
     private static int readInt(JsonNode node, String field) {
 
         JsonNode value = node.path(field);
@@ -202,6 +248,9 @@ public final class JsonStatsRepository implements StatsRepository {
         return value.asInt();
     }
 
+    /** Moves the corrupted statistics file to a backup location.
+     * <p>The backup file uses the {@code .corrupt} suffix.
+     * If the move fails, the error is logged.*/
     private void moveCorruptFileAside() {
 
         Path backup = file.resolveSibling(file.getFileName() + ".corrupt");
@@ -214,8 +263,9 @@ public final class JsonStatsRepository implements StatsRepository {
         }
     }
 
-    // Saving
-
+    /** Serializes the current statistics and saves them to the JSON file.
+     * <p>Save failures are logged and do not propagate to the caller.
+     */
     private void save() {
 
         ObjectNode root = mapper.createObjectNode();
@@ -223,6 +273,7 @@ public final class JsonStatsRepository implements StatsRepository {
 
         ObjectNode entries = root.putObject("stats");
 
+        // Write an entry for every difficulty, including empty statistics.
         for (Difficulty difficulty : Difficulty.values()) {
             DifficultyStats entry = get(difficulty);
 
@@ -245,8 +296,14 @@ public final class JsonStatsRepository implements StatsRepository {
         }
     }
 
-    // Writes to a temporary file first, so a crash cannot leave
-    // a half-written statistics file.
+    /** Writes JSON data to a temporary file and replaces the target file.
+     * <p>An atomic move is attempted first. If the file system does not
+     * support atomic moves, a regular replacement is performed instead.
+     * The temporary file is deleted regardless of the operation result.
+     * @param root JSON object to write
+     * @throws IOException if directory creation, writing, moving,
+     *                     or temporary file deletion fails
+     */
     private void write(ObjectNode root) throws IOException {
 
         Files.createDirectories(directory);
@@ -260,6 +317,8 @@ public final class JsonStatsRepository implements StatsRepository {
             try {
                 Files.move(temp, file, StandardCopyOption.ATOMIC_MOVE);
             } catch (AtomicMoveNotSupportedException e) {
+                // Fall back to a regular replacement when atomic moves
+                // are not supported by the file system.
                 Files.move(temp, file, StandardCopyOption.REPLACE_EXISTING);
             }
 
@@ -268,3 +327,4 @@ public final class JsonStatsRepository implements StatsRepository {
         }
     }
 }
+

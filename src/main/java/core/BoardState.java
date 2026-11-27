@@ -3,25 +3,30 @@ package core;
 import model.CellState;
 import model.Coord;
 
-/**
- * Stores and manages the current state of all cells on the board.
- * Also tracks the number of opened safe cells and placed flags.
+/** Stores and manages the current state of all cells on the board.
+ * Tracks the number of opened safe cells and placed flags.
  */
 final class BoardState {
 
+    /** Provides access to the board geometry and cell coordinates. */
     private final BoardGeometry geometry;
+
+    /** Defines the maximum number of flags that can be placed. */
     private final int totalBombs;
 
+    /** Stores the current state of each cell on the board. */
     private Matrix<CellState> stateMap;
 
+    /** Tracks the number of opened safe cells. */
     private int openedSafeCount;
+
+    /** Tracks the current number of placed flags. */
     private int flaggedCount;
 
-    /**
-     * Creates a new board state and initializes all cells.
+    /** Creates a new board state and initializes all cells.
      *
-     * @param geometry board geometry used to access cell coordinates
-     * @param totalBombs total number of bombs on the board
+     * @param geometry the geometry of the board
+     * @param totalBombs the total number of bombs on the board
      */
     BoardState(BoardGeometry geometry, int totalBombs) {
         this.geometry = geometry;
@@ -30,9 +35,8 @@ final class BoardState {
         start();
     }
 
-    /**
-     * Resets the board state.
-     * All cells become closed and all counters are reset.
+    /** Resets the board to its initial state.
+     * All cells are closed, and both counters are reset to zero.
      */
     void start() {
         stateMap = new Matrix<>(
@@ -44,22 +48,18 @@ final class BoardState {
         flaggedCount = 0;
     }
 
-    /**
-     * Returns the current state of the specified cell.
+    /** Returns the current state of the specified cell.
      *
-     * @param coord cell coordinates
-     * @return current cell state
-     */
+     * @param coord the coordinates of the cell
+     * @return the current state of the cell.*/
     CellState get(Coord coord) {
         return stateMap.get(coord);
     }
 
-    /**
-     * Opens a cell if it is currently closed.
+    /** Opens the specified cell if it is currently closed.
      * Increments the opened safe cell counter.
      *
-     * @param coord cell coordinates
-     */
+     * @param coord the coordinates of the cell to open.*/
     void setOpened(Coord coord) {
         if (stateMap.get(coord) == CellState.CLOSED) {
             stateMap.set(coord, CellState.OPENED);
@@ -67,12 +67,11 @@ final class BoardState {
         }
     }
 
-    /**
-     * Toggles a flag on the specified cell.
-     * A new flag can only be placed if the flag limit is not reached.
+    /** Toggles the flag state of the specified cell.
+     * Removes an existing flag or places a new one if the flag limit
+     * has not been reached.
      *
-     * @param coord cell coordinates
-     */
+     * @param coord the coordinates of the cell.*/
     void toggleFlag(Coord coord) {
         switch (stateMap.get(coord)) {
             case FLAGGED -> {
@@ -88,66 +87,50 @@ final class BoardState {
             }
 
             default -> {
-                // Do nothing if the cell is already opened or exploded.
+                // No action is required for cells that cannot be flagged.
             }
         }
     }
 
-    /**
-     * Marks the specified cell as exploded.
+    /** Marks the specified cell as exploded.
      *
-     * @param coord cell coordinates
-     */
+     * @param coord the coordinates of the exploded cell.*/
     void setExploded(Coord coord) {
         stateMap.set(coord, CellState.EXPLODED);
     }
 
-    /**
-     * Opens a bomb cell if it is currently closed.
+    /** Opens the specified bomb cell if it is currently closed.
      *
-     * @param coord cell coordinates
-     */
+     * @param coord the coordinates of the bomb cell.*/
     void openBomb(Coord coord) {
         if (stateMap.get(coord) == CellState.CLOSED) {
             stateMap.set(coord, CellState.OPENED);
         }
     }
 
-    /**
-     * Marks a flag as incorrect.
-     *
-     * @param coord cell coordinates
-     */
+    /** Marks the specified flag as incorrect.
+     * @param coord the coordinates of the incorrectly flagged cell.*/
     void markWrongFlag(Coord coord) {
         if (stateMap.get(coord) == CellState.FLAGGED) {
             stateMap.set(coord, CellState.WRONG_FLAG);
         }
     }
 
-    /**
-     * Returns the current number of placed flags.
-     *
-     * @return number of flagged cells
-     */
+    /** Returns the current number of placed flags.
+     * @return the number of flagged cells.*/
     int getFlaggedCount() {
         return flaggedCount;
     }
 
-    /**
-     * Returns the number of opened safe cells.
-     *
-     * @return number of opened safe cells
-     */
+    /** Returns the number of opened safe cells.
+     * @return the number of opened safe cells.*/
     int getOpenedSafeCount() {
         return openedSafeCount;
     }
 
-    /**
-     * Counts flagged cells surrounding the specified cell.
-     *
-     * @param coord center cell coordinates
-     * @return number of flagged neighboring cells
-     */
+    /** Counts the flagged cells surrounding the specified cell.
+     * @param coord the coordinates of the center cell
+     * @return the number of flagged neighboring cells.*/
     int getFlaggedBoxesAround(Coord coord) {
         int count = 0;
 
@@ -160,6 +143,7 @@ final class BoardState {
         return count;
     }
 }
+
 
 
 

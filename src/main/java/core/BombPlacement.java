@@ -4,16 +4,13 @@ import java.util.Set;
 
 import model.Coord;
 
-/**
- * Strategy that decides where the bombs are.
+/** Strategy that decides where the bombs are.
  *
  * <p>The game uses {@link RandomBombPlacement}; tests can supply a fixed
- * layout to make scenarios deterministic.
- */
+ * layout to make scenarios deterministic.*/
 interface BombPlacement {
 
-    /**
-     * Chooses bomb positions.
+    /** Chooses bomb positions.
      *
      * @param geometry  the board
      * @param bombs     how many bombs to place

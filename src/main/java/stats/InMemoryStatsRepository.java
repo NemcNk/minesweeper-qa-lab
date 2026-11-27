@@ -11,7 +11,7 @@ import java.util.Objects;
  */
 public final class InMemoryStatsRepository implements StatsRepository {
 
-    // Stores statistics separately for each difficulty level.
+    /** Stores statistics separately for each difficulty level. */
     private final Map<Difficulty, DifficultyStats> stats =
             new EnumMap<>(Difficulty.class);
 

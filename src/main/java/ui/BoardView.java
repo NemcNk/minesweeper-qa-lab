@@ -1,3 +1,4 @@
+
 package ui;
 
 import core.BoardReader;
@@ -6,29 +7,40 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import model.CellSnapshot;
 import model.Coord;
+
 import java.util.function.BiConsumer;
 
-/**
- * Represents the visual game board and manages its cell views.
+/** Represents the visual game board and manages its cell views.
  * Synchronizes the visual representation with the underlying board.
  */
 public final class BoardView {
 
+    /** Defines the spacing between adjacent cells in pixels.*/
     private static final int GAP = 2;
 
+    /** Stores the visual components for each board cell.
+     * The first index represents the column, and the second represents the row.
+     */
     private final CellView[][] cells;
+
+    /** Provides access to the underlying game board data.*/
     private final BoardReader board;
+
+    /** Represents the JavaFX grid containing all cell views.*/
     private final GridPane grid = new GridPane();
+
+    /** Defines the width and height of each cell in pixels.*/
     private final int cellSize;
+
+    /** Handles mouse click events on individual cells.
+     * Receives the clicked cell coordinates and the corresponding mouse event.
+     */
     private final BiConsumer<Coord, MouseEvent> clickHandler;
 
-    /**
-     * Creates a board view and initializes all cell components.
-     *
+    /** Creates a board view and initializes all cell components.
      * @param board the board data source
      * @param cellSize the size of each cell in pixels
-     * @param clickHandler the handler for cell click events
-     */
+     * @param clickHandler the handler for cell click events*/
     public BoardView(
             BoardReader board,
             int cellSize,
@@ -47,9 +59,7 @@ public final class BoardView {
 
     /**
      * Returns the total width of the board, including gaps.
-     *
-     * @return the board width in pixels
-     */
+     * @return the board width in pixels.*/
     public double getBoardWidth() {
         return board.getColumns() * cellSize
                 + (board.getColumns() - 1) * GAP;
@@ -57,9 +67,7 @@ public final class BoardView {
 
     /**
      * Returns the total height of the board, including gaps.
-     *
-     * @return the board height in pixels
-     */
+     * @return the board height in pixels.*/
     public double getBoardHeight() {
         return board.getRows() * cellSize
                 + (board.getRows() - 1) * GAP;
@@ -99,17 +107,14 @@ public final class BoardView {
 
     /**
      * Returns the JavaFX node representing the game board.
-     *
-     * @return the board grid
-     */
+     * @return the board grid.*/
     public GridPane getNode() {
         return grid;
     }
 
     /**
      * Updates cell views when their underlying data changes.
-     * Only modified cells are refreshed.
-     */
+     * Only modified cells are refreshed.*/
     public void update() {
         for (int y = 0; y < board.getRows(); y++) {
             for (int x = 0; x < board.getColumns(); x++) {
@@ -127,5 +132,3 @@ public final class BoardView {
         }
     }
 }
-
-

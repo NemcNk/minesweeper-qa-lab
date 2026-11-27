@@ -1,7 +1,6 @@
 package model;
 
-/**
- * Stores the board dimensions and the total number of bombs.
+/** Stores the board dimensions and the total number of bombs.
  *
  * <p>Only basic configuration invariants are checked here: dimensions must
  * be positive, and at least one bomb-free cell must remain.
@@ -19,8 +18,7 @@ public final class GameConfig {
     /** The total number of bombs on the board. */
     private final int totalBombs;
 
-    /**
-     * Creates a game configuration with the specified dimensions and bomb count.
+    /** Creates a game configuration with the specified dimensions and bomb count.
      *
      * @param columns the number of columns
      * @param rows the number of rows
@@ -52,29 +50,20 @@ public final class GameConfig {
         this.totalBombs = totalBombs;
     }
 
-    /**
-     * Returns the number of columns.
-     *
-     * @return the board width
-     */
+    /** Returns the number of columns.
+     * @return the board width.*/
     public int getColumns() {
         return columns;
     }
 
-    /**
-     * Returns the number of rows.
-     *
-     * @return the board height
-     */
+    /** Returns the number of rows.
+     * @return the board height.*/
     public int getRows() {
         return rows;
     }
 
-    /**
-     * Returns the total number of bombs.
-     *
-     * @return the total bomb count
-     */
+    /** Returns the total number of bombs.
+     * @return the total bomb count.*/
     public int getTotalBombs() {
         return totalBombs;
     }

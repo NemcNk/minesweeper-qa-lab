@@ -22,17 +22,20 @@ import session.GameResult;
 import session.GameSession;
 import session.GameSessionListener;
 
-/**
- * Represents the main Minesweeper game screen.
+/** Represents the main Minesweeper game screen.
  *
  * <p>The screen only draws and forwards input. The rules (timer, pause,
  * restart, recording the result) live in {@link GameSession}; the screen
- * redraws itself from the session callbacks.
- */
+ * redraws itself from the session callbacks.*/
 public final class GameScreen extends StackPane {
 
+    /** Width of each control button. */
     private static final double BUTTON_WIDTH = 170;
+
+    /** Horizontal spacing between control buttons. */
     private static final double BUTTON_GAP = 10;
+
+    /** Total width occupied by the control buttons. */
     private static final double BUTTONS_WIDTH =
             BUTTON_WIDTH * 2 + BUTTON_GAP;
 
@@ -40,22 +43,37 @@ public final class GameScreen extends StackPane {
     private static final Duration RESULT_DELAY =
             Duration.millis(1000);
 
+    /** Text displayed on the pause button. */
     private static final String PAUSE_TEXT = "⏸   Pause";
+
+    /** Text displayed on the resume button. */
     private static final String RESUME_TEXT = "▶   Resume";
 
+    /** Game session responsible for game rules and state. */
     private final GameSession session;
+
+    /** Action executed when returning to the main menu. */
     private final Runnable backAction;
 
+    /** View responsible for rendering the game board. */
     private final BoardView boardView;
+
+    /** Panel displaying game statistics and controls. */
     private final GameTopPanel topPanel;
+
+    /** Overlay displayed while the game is paused. */
     private final PauseOverlay pauseOverlay = new PauseOverlay();
+
+    /** Overlay displayed when the game finishes. */
     private final ResultOverlay resultOverlay;
+
+    /** Button used to pause and resume the game. */
     private final Button pauseButton = new Button(PAUSE_TEXT);
 
+    /** Transition responsible for delaying the result overlay. */
     private PauseTransition resultDelay;
 
-    /**
-     * Creates the game screen and initializes its components.
+    /** Creates the game screen and initializes its components.
      *
      * @param difficulty selected difficulty, defines the cell size
      * @param session game rules and state shown by this screen
@@ -94,19 +112,21 @@ public final class GameScreen extends StackPane {
         fixWidth(topPanel, boardWidth);
         fixWidth(boardView.getNode(), boardWidth);
 
+        // Place the pause overlay above the game board.
         StackPane boardStack = new StackPane(
                 boardView.getNode(),
                 pauseOverlay
         );
         fixWidth(boardStack, boardWidth);
 
-        // Pausing is unavailable until the first move is made.
+        // Configure the pause button and its initial availability.
         pauseButton.getStyleClass().add("stats-link-button");
         pauseButton.setId(UiIds.PAUSE_BUTTON);
         pauseButton.setDisable(!session.isPauseAvailable());
         pauseButton.setOnAction(event -> session.togglePause());
         fixWidth(pauseButton, BUTTON_WIDTH);
 
+        // Configure the button used to return to the main menu.
         Button backButton = new Button("←   Back to menu");
         backButton.getStyleClass().add("stats-link-button");
         backButton.setId(UiIds.BACK_BUTTON);
@@ -116,6 +136,7 @@ public final class GameScreen extends StackPane {
         HBox buttons = new HBox(BUTTON_GAP, backButton, pauseButton);
         buttons.setAlignment(Pos.CENTER);
 
+        // Arrange the game interface vertically.
         VBox content = new VBox(10, topPanel, boardStack, buttons);
         content.setAlignment(Pos.CENTER);
 
@@ -123,18 +144,19 @@ public final class GameScreen extends StackPane {
 
         setMinHeight(400);
 
+        // Initialize the statistics using the current session state.
         topPanel.updateMines(session.getRemainingBombs());
         topPanel.updateTime(session.getRemainingSeconds());
 
+        // Register the listener responsible for updating the interface.
         session.setListener(new SessionObserver());
 
         fadeIn();
     }
 
-    // Input
+    // Handles player input on the game board.
 
-    /**
-     * Forwards a mouse click on the board to the session.
+    /** Forwards a mouse click on the board to the session.
      * During the pause the session ignores clicks as well as the
      * PauseOverlay, which covers the board.
      *
@@ -149,39 +171,44 @@ public final class GameScreen extends StackPane {
         }
     }
 
-    // Reactions to the session
+    // Handles updates received from the game session.
 
-    /**
-     * Redraws the screen when the session changes.
-     */
+    /** Listens for game session events and updates the corresponding
+     * interface components.*/
     private final class SessionObserver implements GameSessionListener {
 
+        /** {@inheritDoc} */
         @Override
         public void boardChanged() {
             boardView.update();
         }
 
+        /** {@inheritDoc} */
         @Override
         public void minesChanged(int remaining) {
             topPanel.updateMines(remaining);
         }
 
+        /** {@inheritDoc} */
         @Override
         public void timeChanged(int remainingSeconds) {
             topPanel.updateTime(remainingSeconds);
         }
 
+        /** {@inheritDoc} */
         @Override
         public void pauseChanged(boolean paused) {
             pauseOverlay.setVisible(paused);
             pauseButton.setText(paused ? RESUME_TEXT : PAUSE_TEXT);
         }
 
+        /** {@inheritDoc} */
         @Override
         public void pauseAvailabilityChanged(boolean available) {
             pauseButton.setDisable(!available);
         }
 
+        /** {@inheritDoc} */
         @Override
         public void finished(GameResult result) {
             topPanel.setFace(
@@ -193,6 +220,7 @@ public final class GameScreen extends StackPane {
             showResult(result);
         }
 
+        /** {@inheritDoc} */
         @Override
         public void restarted() {
             stopResultDelay();
@@ -202,11 +230,8 @@ public final class GameScreen extends StackPane {
         }
     }
 
-    /**
-     * Schedules the display of the game result after a short delay.
-     *
-     * @param result how the game ended
-     */
+    /** Schedules the display of the game result after a short delay.
+     * @param result how the game ended.*/
     private void showResult(GameResult result) {
         String subtitle = subtitleFor(result.state());
 
@@ -221,12 +246,9 @@ public final class GameScreen extends StackPane {
         resultDelay.play();
     }
 
-    /**
-     * Returns the message shown under the result title.
-     *
+    /** Returns the message shown under the result title.
      * @param state final state of the game
-     * @return message for the player
-     */
+     * @return message for the player.*/
     private static String subtitleFor(GameState state) {
         return switch (state) {
             case LOST_BOMB -> "You hit a mine!";
@@ -238,9 +260,7 @@ public final class GameScreen extends StackPane {
         };
     }
 
-    /**
-     * Stops the pending result display animation.
-     */
+    /** Stops the pending result display animation.*/
     private void stopResultDelay() {
         if (resultDelay != null) {
             resultDelay.stop();
@@ -248,10 +268,9 @@ public final class GameScreen extends StackPane {
         }
     }
 
-    // Screen controls
+    //Handles navigation and screen transitions.
 
-    /**
-     * Stops active transitions and returns to the main menu.
+    /** Stops active transitions and returns to the main menu.
      */
     private void exitToMenu() {
         stopResultDelay();
@@ -260,8 +279,7 @@ public final class GameScreen extends StackPane {
         backAction.run();
     }
 
-    /**
-     * Plays the fade-in animation when the game screen appears.
+    /** Plays the fade-in animation when the game screen appears.
      */
     private void fadeIn() {
         setOpacity(0);
@@ -276,25 +294,19 @@ public final class GameScreen extends StackPane {
         fade.play();
     }
 
-    /**
-     * Sets the minimum, preferred and maximum width of a region.
-     *
+    /** Sets the minimum, preferred and maximum width of a region.
      * @param region JavaFX region whose width is being configured
-     * @param width target width
-     */
+     * @param width target width.*/
     private static void fixWidth(Region region, double width) {
         region.setMinWidth(width);
         region.setPrefWidth(width);
         region.setMaxWidth(width);
     }
 
-    // Sizes
+    //Provides preferred dimensions for the game screen layout.
 
-    /**
-     * Returns the preferred width of the game screen content.
-     *
-     * @return calculated content width
-     */
+    /** Returns the preferred width of the game screen content.
+     * @return calculated content width.*/
     public double getContentWidth() {
         return Math.max(
                 Math.max(boardView.getBoardWidth(), topPanel.prefWidth(-1)),
@@ -302,11 +314,8 @@ public final class GameScreen extends StackPane {
         );
     }
 
-    /**
-     * Returns the preferred height of the game screen content.
-     *
-     * @return calculated content height
-     */
+    /** Returns the preferred height of the game screen content.
+     * @return calculated content height.*/
     public double getContentHeight() {
         return boardView.getBoardHeight()
                 + topPanel.prefHeight(-1)
@@ -315,3 +324,4 @@ public final class GameScreen extends StackPane {
                 + 20;
     }
 }
+

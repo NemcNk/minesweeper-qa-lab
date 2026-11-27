@@ -5,18 +5,18 @@ import java.util.function.Supplier;
 
 import model.Coord;
 
-/**
- * Represents a generic two-dimensional matrix based on board geometry.
+/** Represents a generic two-dimensional matrix based on board geometry.
  *
- * @param <T> the type of elements stored in the matrix
- */
+ * @param <T> the type of elements stored in the matrix.*/
 public final class Matrix<T> {
 
+    /** Defines the dimensions and valid coordinates of the matrix. */
     private final BoardGeometry geometry;
+
+    /** Stores matrix elements using their X and Y coordinates. */
     private final Object[][] matrix;
 
-    /**
-     * Creates a matrix and initializes all cells with default values.
+    /** Creates a matrix and initializes all valid cells with default values.
      *
      * @param geometry the geometry defining the matrix dimensions
      * @param defaultValue the supplier providing initial values for cells
@@ -44,11 +44,11 @@ public final class Matrix<T> {
         }
     }
 
-    /**
-     * Returns the value stored at the specified coordinate.
+    /** Returns the value stored at the specified coordinate.
      *
      * @param coord the coordinate of the requested cell
-     * @return the value stored at the coordinate
+     * @return the value stored at the specified coordinate
+     * @throws NullPointerException if the coordinate is null
      * @throws IndexOutOfBoundsException if the coordinate is outside the board
      */
     @SuppressWarnings("unchecked")
@@ -58,13 +58,12 @@ public final class Matrix<T> {
         return (T) matrix[coord.getX()][coord.getY()];
     }
 
-    /**
-     * Updates the value at the specified coordinate.
+    /** Updates the value stored at the specified coordinate.
      *
      * @param coord the coordinate of the cell to update
      * @param value the new value to store
-     * @throws IndexOutOfBoundsException if the coordinate is outside the board
      * @throws NullPointerException if the coordinate or value is null
+     * @throws IndexOutOfBoundsException if the coordinate is outside the board
      */
     public void set(Coord coord, T value) {
         checkCoordinate(coord);
@@ -73,8 +72,7 @@ public final class Matrix<T> {
                 Objects.requireNonNull(value);
     }
 
-    /**
-     * Checks whether the specified coordinate belongs to the board.
+    /** Validates whether the specified coordinate belongs to the board.
      *
      * @param coord the coordinate to validate
      * @throws NullPointerException if the coordinate is null
@@ -88,5 +86,6 @@ public final class Matrix<T> {
         }
     }
 }
+
 
 

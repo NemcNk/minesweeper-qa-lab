@@ -17,7 +17,6 @@ import model.CellState;
 public final class CellView extends StackPane {
 
     private static final double GLYPH_SCALE = 0.78;
-    private static final String FLAG_COLOR = "#e63946";
 
     private final int cellSize;
     private final Label numberLabel = new Label();
@@ -41,7 +40,6 @@ public final class CellView extends StackPane {
         getStyleClass().add("cell");
 
         numberLabel.getStyleClass().add("cell-number");
-        numberLabel.setStyle(fontSizeStyle());
 
         // Initialize the cell as closed and empty.
         setCell(new CellSnapshot(
@@ -92,14 +90,12 @@ public final class CellView extends StackPane {
         return currentCell;
     }
 
-    // Cell state rendering methods.
-
     /**
      * Displays a flag on a closed cell.
      */
     private void showFlag() {
         getStyleClass().add("closed");
-        getChildren().add(createGlyph("⚑", FLAG_COLOR));
+        getChildren().add(createGlyph("⚑", "cell-flag"));
     }
 
     /**
@@ -115,7 +111,7 @@ public final class CellView extends StackPane {
      */
     private void showWrongFlag() {
         getStyleClass().add("opened");
-        getChildren().add(createGlyph("✕", FLAG_COLOR));
+        getChildren().add(createGlyph("✕", "cell-wrong-flag"));
     }
 
     /**
@@ -126,7 +122,6 @@ public final class CellView extends StackPane {
     private void showOpened(CellContent content) {
         getStyleClass().add("opened");
 
-        // Display a mine icon if the cell contains a bomb.
         if (content == CellContent.BOMB) {
             getChildren().add(new MineIcon(cellSize));
             return;
@@ -134,49 +129,57 @@ public final class CellView extends StackPane {
 
         int number = content.getNumber();
 
-        // Display the number of adjacent mines when greater than zero.
         if (number > 0) {
             numberLabel.setText(String.valueOf(number));
 
             numberLabel.getStyleClass()
-                    .removeIf(style -> style.startsWith("number-"));
+                    .removeIf(style ->
+                            style.startsWith("number-")
+                                    || style.startsWith("cell-number-")
+                    );
 
-            numberLabel.getStyleClass().add("number-" + number);
+            numberLabel.getStyleClass().addAll(
+                    "number-" + number,
+                    getGlyphSizeClass()
+            );
 
             getChildren().add(numberLabel);
         }
     }
 
-    // Helper methods.
-
     /**
-     * Creates a graphical label with the specified text and color.
+     * Creates a graphical label with the specified CSS class.
      *
      * @param text the glyph to display
-     * @param color the glyph color
+     * @param styleClass the CSS class applied to the glyph
      * @return the configured label
      */
-    private Label createGlyph(String text, String color) {
+    private Label createGlyph(String text, String styleClass) {
         Label glyph = new Label(text);
 
-        glyph.setStyle(
-                fontSizeStyle() + "-fx-text-fill: " + color + ";"
+        glyph.getStyleClass().addAll(
+                "cell-glyph",
+                getGlyphSizeClass(),
+                styleClass
         );
 
         return glyph;
     }
 
     /**
-     * Calculates the font size based on the cell dimensions.
+     * Determines the CSS size class according to the cell dimensions.
      *
-     * @return the CSS font size declaration
+     * @return the CSS class representing the glyph size
      */
-    private String fontSizeStyle() {
-        return "-fx-font-size: " + (cellSize * GLYPH_SCALE) + "px;";
+    private String getGlyphSizeClass() {
+        if (cellSize <= 21) {
+            return "cell-glyph-small";
+        }
+
+        if (cellSize <= 30) {
+            return "cell-glyph-medium";
+        }
+
+        return "cell-glyph-large";
     }
 }
-
-
-
-
-

@@ -64,6 +64,45 @@
     -fx-font-size: 15px;
 }
 
+/* CELL GLYPHS */
+
+.cell-glyph {
+    -fx-font-weight: bold;
+}
+
+.cell-glyph-small,
+.cell-number-small {
+    -fx-font-size: 14px;
+}
+
+.cell-glyph-medium,
+.cell-number-medium {
+    -fx-font-size: 18px;
+}
+
+.cell-glyph-large,
+.cell-number-large {
+    -fx-font-size: 23px;
+}
+
+.cell-number {
+    -fx-font-weight: bold;
+}
+
+.cell-flag {
+    -fx-text-fill: #e63946;
+}
+
+.cell-wrong-flag {
+    -fx-text-fill: #e63946;
+}
+
+/* COMPACT ACTION BUTTONS */
+
+.play-button.compact {
+    -fx-font-size: 16px;
+}
+
 .play-button {
     -fx-background-color: #202c3d;
     -fx-text-fill: white;
@@ -76,6 +115,52 @@
 
 .play-button:hover {
     -fx-background-color: #34465f;
+}
+
+/* PAUSE OVERLAY */
+
+.pause-overlay {
+    -fx-background-color: rgba(0, 0, 0, 0.6);
+}
+
+.pause-label {
+    -fx-text-fill: white;
+    -fx-font-size: 32px;
+    -fx-font-weight: bold;
+}
+
+/* RESULT OVERLAY */
+
+.result-overlay.won {
+    -fx-background-color: #1c2333;
+}
+
+.result-overlay.lost {
+    -fx-background-color: #faf9f6;
+}
+
+/* STATISTICS */
+
+.statistics-title {
+    -fx-text-fill: #212b3f;
+    -fx-font-size: 28px;
+    -fx-font-weight: bold;
+}
+
+.statistics-card {
+    -fx-background-color: white;
+    -fx-background-radius: 16px;
+    -fx-padding: 24px 32px;
+}
+
+.statistics-cell {
+    -fx-text-fill: #7a7a7a;
+    -fx-font-size: 16px;
+}
+
+.statistics-cell.header {
+    -fx-text-fill: #212b3f;
+    -fx-font-weight: bold;
 }
 
 .stats-link-button {

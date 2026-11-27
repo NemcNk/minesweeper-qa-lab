@@ -4,7 +4,6 @@ import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.function.BooleanSupplier;
 
-import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
@@ -25,9 +24,6 @@ import stats.StatsRepository;
  */
 public final class StatisticsView extends VBox {
 
-    private static final String TEXT_COLOR = "#7a7a7a";
-    private static final String TITLE_COLOR = "#212b3f";
-
     private final StatsRepository stats;
     private final BooleanSupplier confirmReset;
     private final VBox card = new VBox();
@@ -43,8 +39,7 @@ public final class StatisticsView extends VBox {
     }
 
     /**
-     * Creates the statistics view with a custom confirmation. Lets a test
-     * or a future UI test skip the modal dialog.
+     * Creates the statistics view with a custom confirmation.
      *
      * @param stats repository containing game statistics
      * @param backAction action to execute when returning to the menu
@@ -65,19 +60,11 @@ public final class StatisticsView extends VBox {
         setId(UiIds.STATISTICS_VIEW);
 
         Label title = new Label("Statistics");
-        title.setStyle(
-                "-fx-text-fill: " + TITLE_COLOR + ";"
-                        + "-fx-font-size: 28px;"
-                        + "-fx-font-weight: bold;"
-        );
+        title.getStyleClass().add("statistics-title");
 
+        card.getStyleClass().add("statistics-card");
         card.setAlignment(Pos.CENTER);
-        card.setPadding(new Insets(24, 32, 24, 32));
         card.setMaxWidth(USE_PREF_SIZE);
-        card.setStyle(
-                "-fx-background-color: white;"
-                        + "-fx-background-radius: 16;"
-        );
 
         refreshTable();
 
@@ -115,11 +102,17 @@ public final class StatisticsView extends VBox {
      */
     private void refreshTable() {
         GridPane table = new GridPane();
+
         table.setHgap(30);
         table.setVgap(12);
         table.setAlignment(Pos.CENTER);
 
-        String[] headers = {"Difficulty", "Wins", "Losses", "Best time"};
+        String[] headers = {
+                "Difficulty",
+                "Wins",
+                "Losses",
+                "Best time"
+        };
 
         for (int col = 0; col < headers.length; col++) {
             table.add(cell(headers[col], true), col, 0);
@@ -132,7 +125,10 @@ public final class StatisticsView extends VBox {
 
             Label wins = cell(String.valueOf(entry.wins()), false);
             Label losses = cell(String.valueOf(entry.losses()), false);
-            Label best = cell(formatTime(entry.bestTimeSeconds()), false);
+            Label best = cell(
+                    formatTime(entry.bestTimeSeconds()),
+                    false
+            );
 
             wins.setId(UiIds.statsWins(difficulty));
             losses.setId(UiIds.statsLosses(difficulty));
@@ -150,16 +146,17 @@ public final class StatisticsView extends VBox {
     }
 
     /**
-     * Asks the player to confirm the deletion. "Cancel" is the default
-     * button, so a stray Enter key does not delete anything.
+     * Asks the player to confirm the deletion.
+     * Cancel is the default button to prevent accidental deletion.
      *
-     * @return true if the player chose "Reset"
+     * @return true if the player chose Reset
      */
     private static boolean askToConfirmReset() {
         ButtonType reset = new ButtonType(
                 "Reset",
                 ButtonBar.ButtonData.OK_DONE
         );
+
         ButtonType cancel = new ButtonType(
                 "Cancel",
                 ButtonBar.ButtonData.CANCEL_CLOSE
@@ -172,11 +169,13 @@ public final class StatisticsView extends VBox {
                 reset,
                 cancel
         );
+
         alert.setTitle("Reset statistics");
         alert.setHeaderText("Reset all statistics?");
 
         ((Button) alert.getDialogPane().lookupButton(reset))
                 .setDefaultButton(false);
+
         ((Button) alert.getDialogPane().lookupButton(cancel))
                 .setDefaultButton(true);
 
@@ -186,7 +185,7 @@ public final class StatisticsView extends VBox {
     }
 
     /**
-     * Creates a table cell.
+     * Creates a table cell with the appropriate CSS classes.
      *
      * @param text text displayed in the cell
      * @param header whether the cell is a header
@@ -195,11 +194,11 @@ public final class StatisticsView extends VBox {
     private Label cell(String text, boolean header) {
         Label label = new Label(text);
 
-        label.setStyle(
-                "-fx-text-fill: " + (header ? TITLE_COLOR : TEXT_COLOR) + ";"
-                        + "-fx-font-size: 16px;"
-                        + (header ? "-fx-font-weight: bold;" : "")
-        );
+        label.getStyleClass().add("statistics-cell");
+
+        if (header) {
+            label.getStyleClass().add("header");
+        }
 
         return label;
     }
@@ -220,3 +219,4 @@ public final class StatisticsView extends VBox {
         return String.format("%d:%02d", value / 60, value % 60);
     }
 }
+

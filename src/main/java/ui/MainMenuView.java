@@ -162,7 +162,7 @@ public final class MainMenuView extends VBox {
     }
 
     /**
-     * Applies a unified compact height to an action button.
+     * Applies a unified compact height and appearance to an action button.
      *
      * @param button button to resize
      */
@@ -170,8 +170,10 @@ public final class MainMenuView extends VBox {
         button.setMinHeight(ACTION_BUTTON_HEIGHT);
         button.setPrefHeight(ACTION_BUTTON_HEIGHT);
         button.setMaxHeight(ACTION_BUTTON_HEIGHT);
-        button.setStyle("-fx-font-size: 16px;");
+
+        button.getStyleClass().add("compact");
     }
+
 
     /**
      * Creates a vertical bar for the statistics chart icon.

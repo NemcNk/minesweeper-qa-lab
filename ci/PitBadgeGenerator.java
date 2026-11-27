@@ -116,10 +116,10 @@ public final class PitBadgeGenerator {
             throws Exception {
 
         String color = percentage >= 90
-                ? "#4c1"
+                ? "#3FB950"
                 : percentage >= 70
-                ? "#dfb317"
-                : "#e05d44";
+                ? "#D29922"
+                : "#F85149";
 
         String value = percentage + "%";
 

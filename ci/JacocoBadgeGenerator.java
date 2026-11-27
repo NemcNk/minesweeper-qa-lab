@@ -165,10 +165,10 @@ public final class JacocoBadgeGenerator {
         );
 
         String color = percentage >= 80
-                ? "#4c1"
+                ? "#3FB950"
                 : percentage >= 60
-                ? "#dfb317"
-                : "#e05d44";
+                ? "#D29922"
+                : "#F85149";
 
         String value = percentage + "%";
 

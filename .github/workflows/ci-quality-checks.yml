@@ -310,7 +310,6 @@ jobs:
 
     if: >
       always() &&
-      needs.test.outputs.allure_report == 'true' &&
       github.event_name != 'pull_request' &&
       github.ref == 'refs/heads/main'
 
@@ -323,25 +322,32 @@ jobs:
 
     steps:
       - name: Download Allure Report
+        id: download
+        continue-on-error: true
         uses: actions/download-artifact@v4
         with:
           name: allure-report
           path: allure-report
 
-      - name: Prepare GitHub Pages
+      - name: Verify Allure Report
+        if: steps.download.outcome == 'success'
         run: |
           set -e
-          
           test -s allure-report/index.html
-          
           touch allure-report/.nojekyll
-          
-          echo "Allure report is ready."
+          echo "Allure report verified."
 
       - name: Publish Allure Report
+        if: steps.download.outcome == 'success'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: allure-report
           force_orphan: true
+
+      - name: Report missing artifact
+        if: steps.download.outcome != 'success'
+        run: |
+          echo "::error::Allure report artifact was not found."
+          exit 1

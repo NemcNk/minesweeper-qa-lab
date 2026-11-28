@@ -2,16 +2,27 @@ name: ci-quality-checks
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [main, master]
+
   pull_request:
+
   workflow_dispatch:
 
 permissions:
   contents: read
 
+concurrency:
+  group: qa-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+
+  # ==========================================
+  # 1. JUNIT + JACOCO
+  # ==========================================
+
   test:
-    name: Build and test
+    name: Build, Test and JaCoCo
     runs-on: ubuntu-26.04
 
     env:
@@ -36,38 +47,62 @@ jobs:
       - name: Build and test
         run: mvn -B -ntp verify
 
+      - name: Compile JaCoCo badge generator
+        run: |
+          mkdir -p target/ci-classes
+
+          javac --release 25 \
+            -d target/ci-classes \
+            ci/BadgePalette.java \
+            ci/JacocoBadgeGenerator.java
+
       - name: Generate JaCoCo badges
         run: |
-          mkdir -p target/ci
-          javac -d target/ci ci/JacocoBadgeGenerator.java
-          java -cp target/ci ci.JacocoBadgeGenerator
-
-      - name: Upload test and coverage reports
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: reports
-          if-no-files-found: ignore
-          path: |
-            target/surefire-reports
-            target/site/jacoco
+          java -cp target/ci-classes ci.JacocoBadgeGenerator
 
       - name: Verify JaCoCo badges
         run: |
-            ls -lah badges/
-            test -s badges/core-coverage.svg 
+          set -e
+
+          test -s target/site/jacoco/jacoco.xml
+          test -s badges/core-coverage.svg
+
+          for package in core logging session model stats; do
+            test -s "badges/jacoco/${package}.svg"
+          done
+
+          echo "All 5 JaCoCo badges generated."
+
+      - name: Upload JaCoCo reports
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: jacoco-reports
+          if-no-files-found: ignore
+          path: |
+            target/surefire-reports/
+            target/site/jacoco/
 
       - name: Upload JaCoCo badges
         uses: actions/upload-artifact@v7
         with:
-          name: badges
+          name: jacoco-badges
           if-no-files-found: error
-          path: badges/core-coverage.svg
+          path: |
+            badges/core-coverage.svg
+            badges/jacoco/
 
+
+  # ==========================================
+  # 2. PIT MUTATION TESTING
+  # ==========================================
 
   mutation:
-    name: Mutation testing
+    name: Mutation Testing
     runs-on: ubuntu-26.04
+
+    env:
+      TZ: Asia/Almaty
 
     steps:
       - name: Checkout
@@ -80,18 +115,37 @@ jobs:
           java-version: '25'
           cache: maven
 
-      - name: Run PIT on the core package
+      - name: Run PIT
         run: |
           mvn -B -ntp -Pmutation \
             test-compile \
             org.pitest:pitest-maven:mutationCoverage
 
-      - name: Generate PIT mutation badge
-        if: always()
+      - name: Compile PIT badge generator
         run: |
-          mkdir -p target/ci
-          javac -d target/ci ci/PitBadgeGenerator.java
-          java -cp target/ci ci.PitBadgeGenerator
+          mkdir -p target/ci-classes
+
+          javac --release 25 \
+            -d target/ci-classes \
+            ci/BadgePalette.java \
+            ci/PitBadgeGenerator.java
+
+      - name: Generate PIT badges
+        run: |
+          java -cp target/ci-classes ci.PitBadgeGenerator
+
+      - name: Verify PIT badges
+        run: |
+          set -e
+
+          test -s target/pit-reports/mutations.xml
+          test -s badges/mutation.svg
+
+          for package in core logging session model stats; do
+            test -s "badges/pit/${package}.svg"
+          done
+
+          echo "All 5 PIT badges generated."
 
       - name: Upload PIT report
         if: always()
@@ -99,56 +153,71 @@ jobs:
         with:
           name: pit-report
           if-no-files-found: ignore
-          path: target/pit-reports
+          path: target/pit-reports/
 
-      - name: Verify mutation badge
-        if: always()
-        run: test -s badges/mutation.svg
-
-      - name: Upload mutation badge
-        if: always()
+      - name: Upload PIT badges
         uses: actions/upload-artifact@v7
         with:
-          name: mutation-badge
+          name: pit-badges
           if-no-files-found: error
-          path: badges/mutation.svg
+          path: |
+            badges/mutation.svg
+            badges/pit/
 
+
+  # ==========================================
+  # 3. PUBLISH ALL 12 BADGES
+  # ==========================================
 
   badges:
-    name: Publish badges
+    name: Publish QA badges
     runs-on: ubuntu-26.04
 
-    needs: [ test, mutation ]
+    needs:
+      - test
+      - mutation
 
     if: >
       always() &&
       needs.test.result == 'success' &&
-      github.event_name == 'push' &&
+      needs.mutation.result == 'success' &&
+      github.event_name != 'pull_request' &&
       github.ref == 'refs/heads/main'
 
     permissions:
       contents: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
       - name: Download JaCoCo badges
         uses: actions/download-artifact@v4
         with:
-          name: badges
+          name: jacoco-badges
           path: badges
 
-      - name: Download PIT badge
+      - name: Download PIT badges
         uses: actions/download-artifact@v4
         with:
-          name: mutation-badge
+          name: pit-badges
           path: badges
 
-      - name: Verify all badges
+      - name: Verify all 12 badges
         run: |
-          ls -lah badges/
+          set -e
+          
           test -s badges/core-coverage.svg
-          test -s badges/mutation.svg 
+          test -s badges/mutation.svg
 
-      - name: Publish badges to badges branch
+          for package in core logging session model stats; do
+            test -s "badges/jacoco/${package}.svg"
+            test -s "badges/pit/${package}.svg"
+          done
+
+          echo "All 12 badges are ready for publication."
+
+      - name: Publish badges branch
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}

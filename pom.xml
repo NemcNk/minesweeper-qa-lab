@@ -236,7 +236,6 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
-
                         <configuration>
                             <rules>
                                 <rule>
@@ -244,12 +243,64 @@
                                     <includes>
                                         <include>core</include>
                                     </includes>
-
                                     <limits>
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
                                             <minimum>0.90</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <includes>
+                                        <include>logging</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.80</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <includes>
+                                        <include>session</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <includes>
+                                        <include>model</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.90</minimum>
+                                        </limit>
+                                    </limits>
+                                </rule>
+                                <rule>
+                                    <element>PACKAGE</element>
+                                    <includes>
+                                        <include>stats</include>
+                                    </includes>
+                                    <limits>
+                                        <limit>
+                                            <counter>LINE</counter>
+                                            <value>COVEREDRATIO</value>
+                                            <minimum>0.85</minimum>
                                         </limit>
                                     </limits>
                                 </rule>
@@ -347,16 +398,18 @@
                         <configuration>
                             <targetClasses>
                                 <param>core.*</param>
-                                <param>stats.*</param>
+                                <param>logging.*</param>
                                 <param>model.*</param>
                                 <param>session.*</param>
+                                <param>stats.*</param>
                             </targetClasses>
 
                             <targetTests>
                                 <param>core.*</param>
-                                <param>stats.*</param>
+                                <param>logging.*</param>
                                 <param>model.*</param>
                                 <param>session.*</param>
+                                <param>stats.*</param>
                             </targetTests>
 
                             <outputFormats>

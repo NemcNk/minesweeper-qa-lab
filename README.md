@@ -22,6 +22,33 @@ The project was created as a hands-on environment for practicing unit testing, i
 | `stats` | Game results behind the `StatsRepository` interface |
 | `ui`    | JavaFX screens, rendering and input |
 
+## Quality Assurance
+
+### JaCoCo — Code Coverage
+
+Line coverage by package.
+
+| Package   | Coverage   |
+|-----------|------------|
+| `core`    | ![Core](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/jacoco/core.svg)   |
+| `logging` | ![Logging](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/jacoco/logging.svg) |
+| `session` | ![Session](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/jacoco/session.svg) |
+| `model`   | ![Model](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/jacoco/model.svg)   |
+| `stats`   | ![Stats](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/jacoco/stats.svg)   |
+
+### PIT — Mutation Testing
+
+Mutation testing measures how effectively tests detect changes in application code.
+
+| Package   | Mutation score |
+|-----------|----------------|
+| `core`    | ![Core](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/pit/core.svg)        |
+| `logging` | ![Logging](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/pit/logging.svg)     |
+| `session` | ![Session](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/pit/session.svg)     |
+| `model`   | ![Model](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/pit/model.svg)       |
+| `stats`   | ![Stats](https://raw.githubusercontent.com/NemcNk/minesweeper-qa-lab/badges/pit/stats.svg)       |
+
+
 ## Requirements
 
 - JDK 25
@@ -38,9 +65,15 @@ Run the application from your IDE by launching `app.Main`.
 
 ## Testing
 
-- JUnit 5 and AssertJ
+- JUnit 6 and AssertJ
 - Tests for `core` use a fixed bomb layout (`TestBoards.game("*..", "...")`),
   so every scenario is deterministic
 - Timer logic is tested without JavaFX through the `Ticker` abstraction
+- JaCoCo provides package-level line coverage reports
+- PIT performs mutation testing for the main application logic
+
+## Continuous Integration
+
+GitHub Actions automatically runs tests, generates JaCoCo and PIT reports, and publishes updated SVG badges after successful CI runs on main.
 
 Known and fixed defects are documented in [`docs/qa/bugs`](docs/qa/bugs).

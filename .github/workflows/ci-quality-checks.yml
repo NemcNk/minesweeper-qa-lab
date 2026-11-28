@@ -25,12 +25,31 @@ jobs:
     name: Build, Test, Jacoco and Allure
     runs-on: ubuntu-26.04
 
+    outputs:
+      allure_report: ${{ steps.generate_allure.outputs.available }}
+
     env:
       TZ: Asia/Almaty
 
     steps:
       - name: Checkout
         uses: actions/checkout@v7
+
+      # ==========================================
+      # ALLURE HISTORY
+      # ==========================================
+
+      - name: Checkout Allure history
+        if: github.ref == 'refs/heads/main'
+        continue-on-error: true
+        uses: actions/checkout@v7
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      # ==========================================
+      # JAVA
+      # ==========================================
 
       - name: Set up JDK 25
         uses: actions/setup-java@v6
@@ -63,10 +82,28 @@ jobs:
              -print -quit | grep -q .; then
 
             echo "Allure results found."
+
+            # Restore previous history
+            if [ -d gh-pages/history ]; then
+              echo "Restoring previous Allure history."
+
+              mkdir -p target/allure-results/history
+
+              cp -R gh-pages/history/. \
+                target/allure-results/history/
+            fi
+
+            # Generate report
             mvn -B -ntp allure:report
 
+            test -s target/site/allure-maven-plugin/index.html
+
+            echo "available=true" >> "$GITHUB_OUTPUT"
+
           else
-            echo "No Allure results found. Skipping report generation."
+            echo "No Allure results found."
+
+            echo "available=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Upload Allure Report
@@ -258,4 +295,53 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: badges
           publish_dir: badges
+          force_orphan: true
+
+  # ==========================================
+  # 4. PUBLISH ALLURE REPORT
+  # ==========================================
+
+  allure-pages:
+    name: Publish Allure Report
+    runs-on: ubuntu-26.04
+
+    needs:
+      - test
+
+    if: >
+      always() &&
+      needs.test.outputs.allure_report == 'true' &&
+      github.event_name != 'pull_request' &&
+      github.ref == 'refs/heads/main'
+
+    permissions:
+      contents: write
+
+    concurrency:
+      group: allure-pages-deployment
+      cancel-in-progress: false
+
+    steps:
+      - name: Download Allure Report
+        uses: actions/download-artifact@v4
+        with:
+          name: allure-report
+          path: allure-report
+
+      - name: Prepare GitHub Pages
+        run: |
+          set -e
+          
+          test -s allure-report/index.html
+          
+          touch allure-report/.nojekyll
+          
+          echo "Allure report is ready."
+
+      - name: Publish Allure Report
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-report
           force_orphan: true

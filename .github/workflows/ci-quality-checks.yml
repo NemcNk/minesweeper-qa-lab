@@ -18,11 +18,11 @@ concurrency:
 jobs:
 
   # ==========================================
-  # 1. JUNIT + JACOCO
+  # 1. JUNIT + JACOCO + ALLURE
   # ==========================================
 
   test:
-    name: Build, Test and JaCoCo
+    name: Build, Test, Jacoco and Allure
     runs-on: ubuntu-26.04
 
     env:
@@ -44,8 +44,43 @@ jobs:
           java -version
           mvn -v
 
+      # ==========================================
+      # JUNIT + JACOCO
+      # ==========================================
+
       - name: Build and test
         run: mvn -B -ntp verify
+
+      # ==========================================
+      # ALLURE REPORT
+      # ==========================================
+
+      - name: Generate Allure Report
+        if: always()
+        run: |
+          if [ -d target/allure-results ] && \
+             find target/allure-results -name '*-result.json' \
+             -print -quit | grep -q .; then
+
+            echo "Allure results found."
+            mvn -B -ntp allure:report
+
+          else
+            echo "No Allure results found. Skipping report generation."
+          fi
+
+      - name: Upload Allure Report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: allure-report
+          path: target/site/allure-maven-plugin/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # ==========================================
+      # JACOCO BADGES
+      # ==========================================
 
       - name: Compile JaCoCo badge generator
         run: |

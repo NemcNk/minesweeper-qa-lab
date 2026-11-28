@@ -19,6 +19,13 @@ out/
 # jqwik
 .jqwik-database
 
+# Allure runtime
+.allure/
+
+# Allure results and reports
+target/allure-results/
+target/site/allure-maven-plugin/
+
 # Test and coverage reports
 allure-results/
 allure-report/
